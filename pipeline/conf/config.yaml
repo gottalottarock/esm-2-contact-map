@@ -1,0 +1,2 @@
+defaults:
+  - stages/parse_pdb: parse_pdb

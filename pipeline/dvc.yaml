@@ -1,0 +1,11 @@
+stages:
+  parse_pdb:
+    foreach: ${stages.parse_pdb}
+    do:
+      cmd: python ${item.script} ${item.params}
+      deps:
+        - ${item.script}
+        - ${item.params.pdb_dir}
+      outs:
+        - ${item.params.output_fasta}
+        - ${item.params.output_parquet}

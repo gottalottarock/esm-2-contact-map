@@ -1,0 +1,5 @@
+outs:
+- md5: a56730c2a01a3372cde2e28f2df6c4dc
+  size: 2080569673
+  hash: md5
+  path: ml_interview_task_data.zip

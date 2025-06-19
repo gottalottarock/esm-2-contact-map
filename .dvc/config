@@ -1,0 +1,10 @@
+[core]
+    autostage = true
+    remote = gcloud
+[cache]
+    type = symlink
+[hydra]
+    enabled = True
+    config_dir = pipeline/conf
+['remote "gcloud"']
+    url = gs://dvc-bucket-private/deep-origin-task
