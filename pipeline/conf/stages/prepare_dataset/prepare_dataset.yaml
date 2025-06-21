@@ -10,4 +10,4 @@ params:
   output_val_path: ${output_dir}/datasets/val.pt
   output_test_path: ${output_dir}/datasets/test.pt
   output_stats_path: ${output_dir}/datasets/stats.json
-  max_seq_length: ${max_seq_length} 
+  max_seq_length: 1024 
