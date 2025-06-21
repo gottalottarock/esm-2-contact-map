@@ -32,3 +32,36 @@ stages:
       - ${stages.mmseqs2.params.combined_fasta}
       - ${stages.mmseqs2.params.cluster_output_tsv}
       - ${stages.mmseqs2.params.search_output_tsv}
+
+  prepare_dataset:
+    cmd: python ${stages.prepare_dataset.script} ${stages.prepare_dataset.params}
+    deps:
+      - ${stages.prepare_dataset.script}
+      - ${stages.prepare_dataset.params.train_seq_path}
+      - ${stages.prepare_dataset.params.test_seq_path}
+      - ${stages.prepare_dataset.params.validation_pdbs_path}
+    outs:
+      - ${stages.prepare_dataset.params.output_train_path}
+      - ${stages.prepare_dataset.params.output_val_path}
+      - ${stages.prepare_dataset.params.output_test_path}
+      - ${stages.prepare_dataset.params.output_stats_path}
+
+  train:
+    cmd: python ${stages.train.script} ${stages.train.params}
+    deps:
+      - ${stages.train.script}
+      - ${stages.train.params.train_dataset_path}
+      - ${stages.train.params.val_dataset_path}
+      - src/models/
+      - src/datamodules/
+    outs:
+      - ${stages.train.params.output_dir}/
+
+  evaluate:
+    cmd: python ${stages.evaluate.script} ${stages.evaluate.params}
+    deps:
+      - ${stages.evaluate.script}
+      - ${stages.evaluate.params.checkpoint_path}
+      - ${stages.evaluate.params.test_dataset_path}
+    outs:
+      - ${stages.evaluate.params.results_dir}/

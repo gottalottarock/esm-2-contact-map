@@ -1,4 +1,14 @@
 defaults:
+  - model: esm2_medium
+  - dataloader: default
   - stages/parse_pdb: parse_pdb
   - stages/mmseqs2: mmseqs2
   - stages/filter_sequences: filter_sequences
+  - stages/prepare_dataset: prepare_dataset
+  - stages/train: train
+  - stages/evaluate: evaluate
+  - _self_
+
+# Global paths
+data_dir: "../data"
+output_dir: "output"

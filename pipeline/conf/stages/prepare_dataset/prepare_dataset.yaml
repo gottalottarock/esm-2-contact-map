@@ -1,0 +1,13 @@
+defaults:
+  - _self_
+
+script: src/prepare_dataset.py
+params:
+  train_seq_path: ${output_dir}/train_data/train_filtered.parquet
+  test_seq_path: ${output_dir}/test_data/test_filtered.parquet
+  validation_pdbs_path: ${data_dir}/selected_validation_pdbs.json
+  output_train_path: ${output_dir}/datasets/train.pt
+  output_val_path: ${output_dir}/datasets/val.pt
+  output_test_path: ${output_dir}/datasets/test.pt
+  output_stats_path: ${output_dir}/datasets/stats.json
+  max_seq_length: ${max_seq_length} 

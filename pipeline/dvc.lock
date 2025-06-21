@@ -138,3 +138,45 @@ stages:
       hash: md5
       md5: e94468c64a21000dbe2b4080ca8c8309
       size: 4577378
+  prepare_dataset:
+    cmd: python src/prepare_dataset.py --train_seq_path 
+      output/train_data/train_filtered.parquet --test_seq_path 
+      output/test_data/test_filtered.parquet --validation_pdbs_path 
+      ../data/selected_validation_pdbs.json --output_train_path 
+      output/datasets/train.pt --output_val_path output/datasets/val.pt 
+      --output_test_path output/datasets/test.pt --output_stats_path 
+      output/datasets/stats.json --max_seq_length 1024
+    deps:
+    - path: ../data/selected_validation_pdbs.json
+      hash: md5
+      md5: f06fbbc1ff58e894ba82ba90774da7af
+      size: 5354
+    - path: output/test_data/test_filtered.parquet
+      hash: md5
+      md5: e94468c64a21000dbe2b4080ca8c8309
+      size: 4577378
+    - path: output/train_data/train_filtered.parquet
+      hash: md5
+      md5: fa0b6f9781754e248f76df564de64395
+      size: 141102795
+    - path: src/prepare_dataset.py
+      hash: md5
+      md5: 799da055b332964262a07d9c2e8c8708
+      size: 2848
+    outs:
+    - path: output/datasets/stats.json
+      hash: md5
+      md5: 9fe010ccb9b15991b30d0d0786147192
+      size: 122
+    - path: output/datasets/test.pt
+      hash: md5
+      md5: 92625625842448c8cc76634d0b507931
+      size: 677360169
+    - path: output/datasets/train.pt
+      hash: md5
+      md5: 2ba411ecf4fd035b592c6a5388d77640
+      size: 18467970557
+    - path: output/datasets/val.pt
+      hash: md5
+      md5: 86a55f5b534d74b75e4b4e92d4b1b2a6
+      size: 521479505

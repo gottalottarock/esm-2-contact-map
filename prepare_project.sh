@@ -11,4 +11,4 @@ wandb login
 dvc pull ./data/*.dvc
 # dvc pull ./pipeline/dvc.yaml
 
-unzip ./data/ml_interview_task_data.zip
+unzip ./data/ml_interview_task_data.zip -d ./data/

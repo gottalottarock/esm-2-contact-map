@@ -6,4 +6,4 @@ seaborn~=0.13
 scikit-learn~=1.7
 simple-parsing~=0.1
 wandb
-
+lightning~=2.5
