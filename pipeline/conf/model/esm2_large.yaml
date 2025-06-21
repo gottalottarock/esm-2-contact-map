@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - esm2_small
+
+model:
+  model_name: "facebook/esm2_t33_650M_UR50D"
+  num_layers: 33
+  embed_dim: 1280
+  attention_heads: 20
+
+optimizer:
+  lr: 2e-5  # Even lower learning rate for large model
+  
+scheduler:
+  max_lr: 5e-4  # Lower max learning rate 

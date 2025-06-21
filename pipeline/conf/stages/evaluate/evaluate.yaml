@@ -1,0 +1,30 @@
+defaults:
+  - _self_
+
+script: src/evaluate.py
+params:
+  # Model checkpoint path
+  checkpoint_path: ${output_dir}/checkpoints/best_model.ckpt
+  
+  # Data paths
+  test_dataset_path: ${output_dir}/datasets/test.pt
+  
+  # Output paths
+  results_dir: ${output_dir}/evaluation
+  predictions_path: ${output_dir}/evaluation/predictions.csv
+  metrics_path: ${output_dir}/evaluation/metrics.json
+  
+  # Use global dataloader settings (but smaller batch for evaluation)
+  dataloader: ${dataloader}
+    
+  # Evaluation specific settings
+  metrics:
+    - precision
+    - recall  
+    - f1_score
+    - accuracy
+    - contact_precision_at_k: [1, 5, 10]
+    
+  visualize:
+    num_samples: 10
+    save_contact_maps: true 

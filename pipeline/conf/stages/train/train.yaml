@@ -1,0 +1,34 @@
+defaults:
+  - _self_
+
+script: src/train.py
+params:
+  # Data paths
+  train_dataset_path: ${output_dir}/datasets/train.pt
+  val_dataset_path: ${output_dir}/datasets/val.pt
+  test_dataset_path: ${output_dir}/datasets/test.pt
+  
+  # Output paths  
+  output_dir: ${output_dir}/checkpoints
+  log_dir: ${output_dir}/logs
+  
+  # Training params
+  max_epochs: 100
+  val_check_interval: 0.5
+  gradient_clip_val: 1.0
+  accumulate_grad_batches: 1
+  
+  # Use global model and dataloader settings
+  model: ${model}
+  dataloader: ${dataloader}
+    
+  # Callbacks
+  early_stopping:
+    patience: 10
+    monitor: "val_loss"
+    mode: "min"
+    
+  model_checkpoint:
+    monitor: "val_contact_precision"
+    mode: "max"
+    save_top_k: 3 

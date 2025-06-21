@@ -1,0 +1,6 @@
+# @package _global_
+defaults:
+  - base
+dataloader:
+  max_seq_length: 2048
+  batch_size: 16  # Smaller batch size for larger sequences 
