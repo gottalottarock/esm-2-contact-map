@@ -11,7 +11,7 @@ params:
     cluster_min_seq_id: 0.3
     cluster_tmp_dir: /tmp
     cluster_output_tsv: output/mmseqs/all_seqs_clust.tsv
-    search_coverage: 0.5
+    search_coverage: 0.8
     search_min_seq_id: 0.3
     search_tmp_dir: /tmp
     search_output_tsv: output/mmseqs/all_seqs_similarity.tsv 

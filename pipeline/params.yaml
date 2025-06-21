@@ -52,3 +52,14 @@ stages:
         max_length: 1000
         max_x_fraction: 0.1
         max_b_factor: 100.0
+  prepare_dataset:
+    script: src/prepare_dataset.py
+    params:
+      train_seq_path: output/train_data/train_filtered.parquet
+      test_seq_path: output/test_data/test_filtered.parquet
+      validation_pdbs_path: ../data/selected_validation_pdbs.json
+      output_train_path: output/datasets/train.pt
+      output_val_path: output/datasets/val.pt
+      output_test_path: output/datasets/test.pt
+      output_stats_path: output/datasets/stats.json
+      max_seq_length: 1024
