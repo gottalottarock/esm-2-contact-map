@@ -1,0 +1,140 @@
+schema: '2.0'
+stages:
+  parse_pdb@train:
+    cmd: python src/parse_pdb.py --pdb_dir ../data/train --split train 
+      --output_fasta output/train_data/train.fasta --output_parquet 
+      output/train_data/train.parquet
+    deps:
+    - path: ../data/train
+      hash: md5
+      md5: 74273339a4952e0fd46387de3f67aee8.dir
+      size: 8224991748
+      nfiles: 15000
+    - path: src/parse_pdb.py
+      hash: md5
+      md5: 745f7312c742b2a62ded281315fa254c
+      size: 4700
+    outs:
+    - path: output/train_data/train.fasta
+      hash: md5
+      md5: 6bfd5e595023b90c4659e94a0badf7bb
+      size: 7684601
+    - path: output/train_data/train.parquet
+      hash: md5
+      md5: 776a0fc1b5477589ace417e2394dc8d0
+      size: 145021981
+  parse_pdb@test:
+    cmd: python src/parse_pdb.py --pdb_dir ../data/test --split test 
+      --output_fasta output/test_data/test.fasta --output_parquet 
+      output/test_data/test.parquet
+    deps:
+    - path: ../data/test
+      hash: md5
+      md5: 51609831755873f0bb95e540f9b83b00.dir
+      size: 270372087
+      nfiles: 500
+    - path: src/parse_pdb.py
+      hash: md5
+      md5: 745f7312c742b2a62ded281315fa254c
+      size: 4700
+    outs:
+    - path: output/test_data/test.fasta
+      hash: md5
+      md5: db18eb34675132e9f3d8cead8fc6c271
+      size: 267111
+    - path: output/test_data/test.parquet
+      hash: md5
+      md5: dcb1f18bfa65103e9d65685c9369b02c
+      size: 4696989
+  mmseqs2:
+    cmd: python src/run_mmseqs2.py --train_fasta 
+      output/train_data/train_filtered.fasta --test_fasta 
+      output/test_data/test_filtered.fasta --combined_fasta 
+      output/mmseqs/all_seq.fasta --db_path output/mmseqs/all_seqs_db 
+      --cluster_coverage 0.8 --cluster_min_seq_id 0.3 --cluster_tmp_dir /tmp 
+      --cluster_output_tsv output/mmseqs/all_seqs_clust.tsv --search_coverage 
+      0.8 --search_min_seq_id 0.3 --search_tmp_dir /tmp --search_output_tsv 
+      output/mmseqs/all_seqs_similarity.tsv
+    deps:
+    - path: output/test_data/test_filtered.fasta
+      hash: md5
+      md5: a0924379fd4b7df8a0ea6648612393eb
+      size: 266140
+    - path: output/train_data/train_filtered.fasta
+      hash: md5
+      md5: 60a01e4680bcb43d281d4a2caa91d701
+      size: 7613324
+    - path: src/run_mmseqs2.py
+      hash: md5
+      md5: 1584491a261e1a3d1bd40df1f86985a2
+      size: 4914
+    outs:
+    - path: output/mmseqs/all_seq.fasta
+      hash: md5
+      md5: 52b92ee0b9ee105eea12427280072dc1
+      size: 7879464
+    - path: output/mmseqs/all_seqs_clust.tsv
+      hash: md5
+      md5: d3e122bc224fdd80427217d4c2a6309b
+      size: 671166
+    - path: output/mmseqs/all_seqs_similarity.tsv
+      hash: md5
+      md5: 963c611fd1d45c3a7a12cd1919fa1207
+      size: 27530359
+  filter_sequences@train:
+    cmd: python src/filter_sequences.py --input_parquet 
+      output/train_data/train.parquet --input_fasta 
+      output/train_data/train.fasta --output_parquet 
+      output/train_data/train_filtered.parquet --output_fasta 
+      output/train_data/train_filtered.fasta --min_length 30 --max_length 1000 
+      --max_x_fraction 0.1 --max_b_factor 100.0
+    deps:
+    - path: output/train_data/train.fasta
+      hash: md5
+      md5: 6bfd5e595023b90c4659e94a0badf7bb
+      size: 7684601
+    - path: output/train_data/train.parquet
+      hash: md5
+      md5: 776a0fc1b5477589ace417e2394dc8d0
+      size: 145021981
+    - path: src/filter_sequences.py
+      hash: md5
+      md5: 9bb35855283c68b2ed61eb0299bdcee8
+      size: 5576
+    outs:
+    - path: output/train_data/train_filtered.fasta
+      hash: md5
+      md5: 60a01e4680bcb43d281d4a2caa91d701
+      size: 7613324
+    - path: output/train_data/train_filtered.parquet
+      hash: md5
+      md5: fa0b6f9781754e248f76df564de64395
+      size: 141102795
+  filter_sequences@test:
+    cmd: python src/filter_sequences.py --input_parquet 
+      output/test_data/test.parquet --input_fasta output/test_data/test.fasta 
+      --output_parquet output/test_data/test_filtered.parquet --output_fasta 
+      output/test_data/test_filtered.fasta --min_length 30 --max_length 1000 
+      --max_x_fraction 0.1 --max_b_factor 100.0
+    deps:
+    - path: output/test_data/test.fasta
+      hash: md5
+      md5: db18eb34675132e9f3d8cead8fc6c271
+      size: 267111
+    - path: output/test_data/test.parquet
+      hash: md5
+      md5: dcb1f18bfa65103e9d65685c9369b02c
+      size: 4696989
+    - path: src/filter_sequences.py
+      hash: md5
+      md5: 9bb35855283c68b2ed61eb0299bdcee8
+      size: 5576
+    outs:
+    - path: output/test_data/test_filtered.fasta
+      hash: md5
+      md5: a0924379fd4b7df8a0ea6648612393eb
+      size: 266140
+    - path: output/test_data/test_filtered.parquet
+      hash: md5
+      md5: e94468c64a21000dbe2b4080ca8c8309
+      size: 4577378

@@ -9,3 +9,26 @@ stages:
       outs:
         - ${item.params.output_fasta}
         - ${item.params.output_parquet}
+
+  filter_sequences:
+    foreach: ${stages.filter_sequences}
+    do:
+      cmd: python ${item.script} ${item.params}
+      deps:
+        - ${item.script}
+        - ${item.params.input_parquet}
+        - ${item.params.input_fasta}
+      outs:
+        - ${item.params.output_parquet}
+        - ${item.params.output_fasta}
+
+  mmseqs2:
+    cmd: python ${stages.mmseqs2.script} ${stages.mmseqs2.params}
+    deps:
+      - ${stages.mmseqs2.script}
+      - ${stages.mmseqs2.params.train_fasta}
+      - ${stages.mmseqs2.params.test_fasta}
+    outs:
+      - ${stages.mmseqs2.params.combined_fasta}
+      - ${stages.mmseqs2.params.cluster_output_tsv}
+      - ${stages.mmseqs2.params.search_output_tsv}

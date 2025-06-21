@@ -1,0 +1,54 @@
+stages:
+  parse_pdb:
+    train:
+      script: src/parse_pdb.py
+      params:
+        pdb_dir: ../data/train
+        split: train
+        output_fasta: output/train_data/train.fasta
+        output_parquet: output/train_data/train.parquet
+    test:
+      script: src/parse_pdb.py
+      params:
+        pdb_dir: ../data/test
+        split: test
+        output_fasta: output/test_data/test.fasta
+        output_parquet: output/test_data/test.parquet
+  mmseqs2:
+    script: src/run_mmseqs2.py
+    params:
+      train_fasta: output/train_data/train_filtered.fasta
+      test_fasta: output/test_data/test_filtered.fasta
+      combined_fasta: output/mmseqs/all_seq.fasta
+      db_path: output/mmseqs/all_seqs_db
+      cluster_coverage: 0.8
+      cluster_min_seq_id: 0.3
+      cluster_tmp_dir: /tmp
+      cluster_output_tsv: output/mmseqs/all_seqs_clust.tsv
+      search_coverage: 0.8
+      search_min_seq_id: 0.3
+      search_tmp_dir: /tmp
+      search_output_tsv: output/mmseqs/all_seqs_similarity.tsv
+  filter_sequences:
+    train:
+      script: src/filter_sequences.py
+      params:
+        input_parquet: output/train_data/train.parquet
+        input_fasta: output/train_data/train.fasta
+        output_parquet: output/train_data/train_filtered.parquet
+        output_fasta: output/train_data/train_filtered.fasta
+        min_length: 30
+        max_length: 1000
+        max_x_fraction: 0.1
+        max_b_factor: 100.0
+    test:
+      script: src/filter_sequences.py
+      params:
+        input_parquet: output/test_data/test.parquet
+        input_fasta: output/test_data/test.fasta
+        output_parquet: output/test_data/test_filtered.parquet
+        output_fasta: output/test_data/test_filtered.fasta
+        min_length: 30
+        max_length: 1000
+        max_x_fraction: 0.1
+        max_b_factor: 100.0

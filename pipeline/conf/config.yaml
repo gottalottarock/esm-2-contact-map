@@ -1,2 +1,4 @@
 defaults:
   - stages/parse_pdb: parse_pdb
+  - stages/mmseqs2: mmseqs2
+  - stages/filter_sequences: filter_sequences

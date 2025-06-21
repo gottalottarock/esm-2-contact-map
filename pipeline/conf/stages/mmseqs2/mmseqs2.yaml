@@ -1,0 +1,17 @@
+defaults:
+  - _self_
+
+script: src/run_mmseqs2.py
+params:
+    train_fasta: output/train_data/train_filtered.fasta
+    test_fasta: output/test_data/test_filtered.fasta
+    combined_fasta: output/mmseqs/all_seq.fasta
+    db_path: output/mmseqs/all_seqs_db
+    cluster_coverage: 0.8
+    cluster_min_seq_id: 0.3
+    cluster_tmp_dir: /tmp
+    cluster_output_tsv: output/mmseqs/all_seqs_clust.tsv
+    search_coverage: 0.5
+    search_min_seq_id: 0.3
+    search_tmp_dir: /tmp
+    search_output_tsv: output/mmseqs/all_seqs_similarity.tsv 

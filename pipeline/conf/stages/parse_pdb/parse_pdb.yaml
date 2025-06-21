@@ -2,17 +2,17 @@ defaults:
   - _self_
 
 'train':
-  script: python src/parse_pdb.py
+  script: src/parse_pdb.py
   params:
-    pdb_dir: ./data/pdb/train
+    pdb_dir: ../data/train
     split: train
     output_fasta: output/train_data/train.fasta
     output_parquet: output/train_data/train.parquet
 
 'test':
-  script: python src/parse_pdb.py
+  script: src/parse_pdb.py
   params:
-    pdb_dir: ./data/pdb/test
+    pdb_dir: ../data/test
     split: test
     output_fasta: output/test_data/test.fasta
     output_parquet: output/test_data/test.parquet

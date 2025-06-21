@@ -1,0 +1,9 @@
+biopython==1.85
+pandas==2.3.0
+pyarrow==20.0.0
+dvc[gs]==3.60.1
+seaborn~=0.13
+scikit-learn~=1.7
+simple-parsing~=0.1
+wandb
+

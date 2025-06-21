@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+
+'train':
+  script: src/filter_sequences.py
+  params:
+    input_parquet: output/train_data/train.parquet
+    input_fasta: output/train_data/train.fasta
+    output_parquet: output/train_data/train_filtered.parquet
+    output_fasta: output/train_data/train_filtered.fasta
+    min_length: 30
+    max_length: 1000
+    max_x_fraction: 0.1
+    max_b_factor: 100.0
+
+'test':
+  script: src/filter_sequences.py
+  params:
+    input_parquet: output/test_data/test.parquet
+    input_fasta: output/test_data/test.fasta
+    output_parquet: output/test_data/test_filtered.parquet
+    output_fasta: output/test_data/test_filtered.fasta
+    min_length: 30
+    max_length: 1000
+    max_x_fraction: 0.1
+    max_b_factor: 100.0 
