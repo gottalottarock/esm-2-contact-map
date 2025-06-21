@@ -1,0 +1,5 @@
+outs:
+- md5: f06fbbc1ff58e894ba82ba90774da7af
+  size: 5354
+  hash: md5
+  path: selected_validation_pdbs.json

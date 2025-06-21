@@ -1,0 +1,5 @@
+outs:
+- md5: fba088014fa4fc24726277b7b36f2d42
+  size: 8922
+  hash: md5
+  path: selected_validation_clusters.json
