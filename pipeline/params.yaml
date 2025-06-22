@@ -1,3 +1,26 @@
+model:
+  _target_: models.esm2_contact_predictor.ESM2ContactPredictor
+  model_name: facebook/esm2_t30_150M_UR50D
+  num_layers: 30
+  embed_dim: 640
+  attention_heads: 20
+  dropout: 0.1
+  contact_prediction_head: true
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 5.0e-05
+  weight_decay: 0.01
+scheduler:
+  _target_: torch.optim.lr_scheduler.OneCycleLR
+  max_lr: 0.001
+  total_steps: 10000
+dataloader:
+  batch_size: 32
+  num_workers: 4
+  max_seq_length: 1024
+  tokenizer_name: facebook/esm2_t30_150M_UR50D
+  include_b_factors: false
+  contact_threshold: 8.0
 stages:
   parse_pdb:
     train:
@@ -63,3 +86,67 @@ stages:
       output_test_path: output/datasets/test.pt
       output_stats_path: output/datasets/stats.json
       max_seq_length: 1024
+  train:
+    script: src/train.py
+    params:
+      train_dataset_path: output/datasets/train.pt
+      val_dataset_path: output/datasets/val.pt
+      test_dataset_path: output/datasets/test.pt
+      output_dir: output/checkpoints
+      log_dir: output/logs
+      max_epochs: 100
+      val_check_interval: 0.5
+      gradient_clip_val: 1.0
+      accumulate_grad_batches: 1
+      model:
+        _target_: models.esm2_contact_predictor.ESM2ContactPredictor
+        model_name: facebook/esm2_t30_150M_UR50D
+        num_layers: 30
+        embed_dim: 640
+        attention_heads: 20
+        dropout: 0.1
+        contact_prediction_head: true
+      dataloader:
+        batch_size: 32
+        num_workers: 4
+        max_seq_length: 1024
+        tokenizer_name: facebook/esm2_t30_150M_UR50D
+        include_b_factors: false
+        contact_threshold: 8.0
+      early_stopping:
+        patience: 10
+        monitor: val_loss
+        mode: min
+      model_checkpoint:
+        monitor: val_contact_precision
+        mode: max
+        save_top_k: 3
+  evaluate:
+    script: src/evaluate.py
+    params:
+      checkpoint_path: output/checkpoints/best_model.ckpt
+      test_dataset_path: output/datasets/test.pt
+      results_dir: output/evaluation
+      predictions_path: output/evaluation/predictions.csv
+      metrics_path: output/evaluation/metrics.json
+      dataloader:
+        batch_size: 32
+        num_workers: 4
+        max_seq_length: 1024
+        tokenizer_name: facebook/esm2_t30_150M_UR50D
+        include_b_factors: false
+        contact_threshold: 8.0
+      metrics:
+      - precision
+      - recall
+      - f1_score
+      - accuracy
+      - contact_precision_at_k:
+        - 1
+        - 5
+        - 10
+      visualize:
+        num_samples: 10
+        save_contact_maps: true
+data_dir: ../data
+output_dir: output
