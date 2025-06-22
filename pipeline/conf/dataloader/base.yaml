@@ -7,6 +7,6 @@ dataloader:
   batch_size: 32
   num_workers: 4
   max_seq_length: 1024
-  tokenizer_name: "facebook/esm2_t33_650M_UR50D"
+  tokenizer_name: ${model._target_}
   include_b_factors: true
   contact_threshold: 8.0 
