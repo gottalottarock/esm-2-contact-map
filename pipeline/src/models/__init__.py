@@ -1,0 +1,1 @@
+from models.esm2_contact_predictor import ESM2ContactPredictor, ESM2ContactPredictorConfig

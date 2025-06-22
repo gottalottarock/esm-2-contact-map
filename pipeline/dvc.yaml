@@ -47,21 +47,18 @@ stages:
       - ${stages.prepare_dataset.params.output_stats_path}
 
   train:
-    cmd: python ${stages.train.script} ${stages.train.params}
-    deps:
-      - ${stages.train.script}
+    cmd: python ${stages.train.script} --model ${stages.train.model._target_} --datamodule ${stages.train.datamodule._target_} ${stages.train.params}
+    deps: 
       - ${stages.train.params.train_dataset_path}
       - ${stages.train.params.val_dataset_path}
-      - src/models/
-      - src/datamodules/
     outs:
-      - ${stages.train.params.output_dir}/
+      - ${stages.train.params.output_dir}
 
-  evaluate:
-    cmd: python ${stages.evaluate.script} ${stages.evaluate.params}
-    deps:
-      - ${stages.evaluate.script}
-      - ${stages.evaluate.params.checkpoint_path}
-      - ${stages.evaluate.params.test_dataset_path}
-    outs:
-      - ${stages.evaluate.params.results_dir}/
+  # evaluate:
+  #   cmd: python ${stages.evaluate.script} ${stages.evaluate.params}
+  #   deps:
+  #     - ${stages.evaluate.script}
+  #     - ${stages.evaluate.params.checkpoint_path}
+  #     - ${stages.evaluate.params.test_dataset_path}
+  #   outs:
+  #     - ${stages.evaluate.params.results_dir}/

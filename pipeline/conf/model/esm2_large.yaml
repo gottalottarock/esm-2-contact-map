@@ -1,15 +1,16 @@
 # @package _global_
 defaults:
-  - esm2_small
+  - _self_
 
 model:
-  model_name: "facebook/esm2_t33_650M_UR50D"
-  num_layers: 33
-  embed_dim: 1280
-  attention_heads: 20
-
-optimizer:
-  lr: 2e-5  # Even lower learning rate for large model
+  _target_: "esm2_contact_predictor"  # Reference to registered model class
+  name: "esm2_large"  # Backbone model name
+  dropout: 0.1
+  contact_prediction_head: true
+  freeze_backbone: true  # Large model frozen by default
   
-scheduler:
-  max_lr: 5e-4  # Lower max learning rate 
+  # Training settings (will use model-specific defaults based on 'name')
+  optimizer_lr: 2e-5
+  optimizer_weight_decay: 0.01
+  scheduler_max_lr: 2e-4
+  scheduler_total_steps: 20000

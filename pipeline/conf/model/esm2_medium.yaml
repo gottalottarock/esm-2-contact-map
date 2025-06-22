@@ -3,10 +3,14 @@ defaults:
   - esm2_small
 
 model:
-  model_name: "facebook/esm2_t30_150M_UR50D"
-  num_layers: 30
-  embed_dim: 640
-  attention_heads: 20
+  backbone: "esm2_medium"
+  name: "esm2_medium"  # Backbone model name
+  dropout: 0.1
+  contact_prediction_head: true
+  freeze_backbone: false
+  
+  optimizer_lr: 5e-5
+  optimizer_weight_decay: 0.01
+  scheduler_max_lr: 5e-4
+  scheduler_total_steps: 15000
 
-optimizer:
-  lr: 5e-5  # Lower learning rate for larger model 

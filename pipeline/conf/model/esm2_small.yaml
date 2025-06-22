@@ -3,20 +3,15 @@ defaults:
   - _self_
 
 model:
-  _target_: models.esm2_contact_predictor.ESM2ContactPredictor
-  model_name: "facebook/esm2_t12_35M_UR50D"
-  num_layers: 12
-  embed_dim: 480
-  attention_heads: 20
+  _target_: "esm2_contact_predictor"  # Reference to registered model class
+  backbone: "esm2_small"  # Backbone model name
+  name: "esm2_small" # Name of model for better comparison
   dropout: 0.1
   contact_prediction_head: true
+  freeze_backbone: true
   
-optimizer:
-  _target_: torch.optim.AdamW
-  lr: 1e-4
-  weight_decay: 0.01
-  
-scheduler:
-  _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 1e-3
-  total_steps: 10000 
+  # Training settings (will use model-specific defaults based on 'name')
+  optimizer_lr: 1e-4
+  optimizer_weight_decay: 0.01
+  scheduler_max_lr: 1e-3
+  scheduler_total_steps: 10000 
