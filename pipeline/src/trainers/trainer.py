@@ -12,8 +12,8 @@ from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 class CheckpointConfig:
     monitor: str
     mode: str
-    save_top_k: int
-    save_last: bool
+    save_top_k: int = 1
+    save_last: bool = False
 
 @dataclass
 class EarlyStoppingConfig:
@@ -65,7 +65,7 @@ def initialize_trainer(
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=config.output_dir / "checkpoints",
-        filename="{epoch}-{%s:.4f}" % config.checkpoint.monitor,
+        filename="{epoch}-{%s:.4f}" % config.checkpoint.monitor.replace("/", "_"),
         monitor=config.checkpoint.monitor,
         mode=config.checkpoint.mode,
         save_top_k=config.checkpoint.save_top_k,

@@ -8,3 +8,4 @@ simple-parsing~=0.1
 wandb
 lightning~=2.5
 transformers~=4.52
+tensorboard
