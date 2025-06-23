@@ -1,11 +1,10 @@
-# @package _global_
 defaults:
   - _self_
 
-model:
-  _target_: "esm2_unsupervised_baseline"  # Reference to baseline model
-  name: "esm2_unsupervised_baseline"  # Backbone model name
-  backbone: facebook/esm2_t33_650M_UR50D
-  # Training settings
-  learning_rate: 1e-3
-  weight_decay: 1e-4 
+
+_target_: "esm2_unsupervised_baseline"  # Reference to baseline model
+name: "esm2_unsupervised_baseline"  # Backbone model name
+backbone: facebook/esm2_t33_650M_UR50D
+# Training settings
+learning_rate: 5e-3
+weight_decay: 1e-3 

@@ -47,12 +47,21 @@ stages:
       - ${stages.prepare_dataset.params.output_stats_path}
 
   train:
-    cmd: python ${stages.train.script} --model ${stages.train.model._target_} --datamodule ${stages.train.datamodule._target_} ${stages.train.params}
+    cmd: python ${stages.train.script} --model ${stages.train.params.model._target_} --datamodule ${stages.train.params.datamodule._target_} ${stages.train.params}
     deps: 
-      - ${stages.train.params.train_dataset_path}
-      - ${stages.train.params.val_dataset_path}
+      - ${stages.train.params.datamodule.train_dataset_path}
+      - ${stages.train.params.datamodule.val_dataset_path}
     outs:
-      - ${stages.train.params.output_dir}
+      - ${stages.train.params.trainer.output_dir}
+
+  predict:
+    foreach: ${stages.predict}
+    do:
+      cmd: python ${item.script} --model ${item.params.model._target_} --datamodule ${item.params.datamodule._target_} ${item.params}
+      deps:
+        - ${item.params.datamodule.test_dataset_path}
+      outs:
+        - ${item.params.output_predictions_path}
 
   # evaluate:
   #   cmd: python ${stages.evaluate.script} ${stages.evaluate.params}
