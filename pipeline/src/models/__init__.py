@@ -1,1 +1,1 @@
-from models.esm2_contact_predictor import ESM2ContactPredictor, ESM2ContactPredictorConfig
+from models.baseline_unsupervised import ESM2UnsupervisedBaseline, ESM2UnsupervisedBaselineConfig

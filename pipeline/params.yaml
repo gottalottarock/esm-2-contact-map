@@ -1,26 +1,44 @@
 model:
-  _target_: models.esm2_contact_predictor.ESM2ContactPredictor
-  model_name: facebook/esm2_t30_150M_UR50D
-  num_layers: 30
-  embed_dim: 640
-  attention_heads: 20
-  dropout: 0.1
-  contact_prediction_head: true
-optimizer:
-  _target_: torch.optim.AdamW
-  lr: 5.0e-05
-  weight_decay: 0.01
-scheduler:
-  _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 0.001
-  total_steps: 10000
-dataloader:
-  batch_size: 32
+  _target_: esm2_unsupervised_baseline
+  name: esm2_unsupervised_baseline
+  backbone: facebook/esm2_t33_650M_UR50D
+  learning_rate: 0.005
+  weight_decay: 0.001
+datamodule:
+  _target_: protein_datamodule
+  name: small number of sequences
+  batch_size: 1
   num_workers: 4
   max_seq_length: 1024
-  tokenizer_name: models.esm2_contact_predictor.ESM2ContactPredictor
+  tokenizer_name: facebook/esm2_t33_650M_UR50D
   include_b_factors: false
   contact_threshold: 8.0
+  train_dataset_path: output/datasets/train.pt
+  val_dataset_path: output/datasets/val.pt
+  test_dataset_path: output/datasets/test.pt
+  sampler:
+    cluster_path: output/mmseqs/all_seqs_clust.tsv
+    train_n_pdb: 20
+    train_intersect_val_clusters: false
+    train_intersect_test_clusters: false
+    val_n_pdb: 100
+    test_n_pdb: 1.0
+    train_max_chains_per_pdb: 1
+    val_max_chains_per_pdb: 1
+trainer:
+  output_dir: output/train_checkpoints
+  max_epochs: 300
+  log_every_n_steps: 10
+  accumulate_grad_batches: 4
+  checkpoint:
+    monitor: val_precision_long@L/5
+    mode: max
+    save_top_k: 1
+    save_last: false
+  early_stopping:
+    monitor: val_precision_long@L/5
+    patience: 10
+    mode: max
 stages:
   parse_pdb:
     train:
@@ -89,64 +107,139 @@ stages:
   train:
     script: src/train.py
     params:
-      train_dataset_path: output/datasets/train.pt
-      val_dataset_path: output/datasets/val.pt
-      test_dataset_path: output/datasets/test.pt
-      output_dir: output/checkpoints
-      log_dir: output/logs
-      max_epochs: 100
-      val_check_interval: 0.5
-      gradient_clip_val: 1.0
-      accumulate_grad_batches: 1
+      trainer:
+        output_dir: output/train_checkpoints
+        max_epochs: 300
+        log_every_n_steps: 10
+        accumulate_grad_batches: 4
+        checkpoint:
+          monitor: val_precision_long@L/5
+          mode: max
+          save_top_k: 1
+          save_last: false
+        early_stopping:
+          monitor: val_precision_long@L/5
+          patience: 10
+          mode: max
       model:
-        _target_: models.esm2_contact_predictor.ESM2ContactPredictor
-        model_name: facebook/esm2_t30_150M_UR50D
-        num_layers: 30
-        embed_dim: 640
-        attention_heads: 20
-        dropout: 0.1
-        contact_prediction_head: true
-      dataloader:
-        batch_size: 32
+        _target_: esm2_unsupervised_baseline
+        name: esm2_unsupervised_baseline
+        backbone: facebook/esm2_t33_650M_UR50D
+        learning_rate: 0.005
+        weight_decay: 0.001
+      datamodule:
+        _target_: protein_datamodule
+        name: small number of sequences
+        batch_size: 1
         num_workers: 4
         max_seq_length: 1024
-        tokenizer_name: models.esm2_contact_predictor.ESM2ContactPredictor
+        tokenizer_name: facebook/esm2_t33_650M_UR50D
         include_b_factors: false
         contact_threshold: 8.0
-      early_stopping:
-        patience: 10
-        monitor: val_loss
-        mode: min
-      model_checkpoint:
-        monitor: val_contact_precision
-        mode: max
-        save_top_k: 3
-  evaluate:
-    script: src/evaluate.py
-    params:
-      checkpoint_path: output/checkpoints/best_model.ckpt
-      test_dataset_path: output/datasets/test.pt
-      results_dir: output/evaluation
-      predictions_path: output/evaluation/predictions.csv
-      metrics_path: output/evaluation/metrics.json
-      dataloader:
-        batch_size: 32
-        num_workers: 4
-        max_seq_length: 1024
-        tokenizer_name: models.esm2_contact_predictor.ESM2ContactPredictor
-        include_b_factors: false
-        contact_threshold: 8.0
-      metrics:
-      - precision
-      - recall
-      - f1_score
-      - accuracy
-      - contact_precision_at_k:
-        - 1
-        - 5
-        - 10
-      visualize:
-        num_samples: 10
-        save_contact_maps: true
+        train_dataset_path: output/datasets/train.pt
+        val_dataset_path: output/datasets/val.pt
+        test_dataset_path: output/datasets/test.pt
+        sampler:
+          cluster_path: output/mmseqs/all_seqs_clust.tsv
+          train_n_pdb: 20
+          train_intersect_val_clusters: false
+          train_intersect_test_clusters: false
+          val_n_pdb: 100
+          test_n_pdb: 1.0
+          train_max_chains_per_pdb: 1
+          val_max_chains_per_pdb: 1
+  predict:
+    val:
+      script: src/predict.py
+      params:
+        trainer:
+          output_dir: output/train_checkpoints
+          max_epochs: 300
+          log_every_n_steps: 10
+          accumulate_grad_batches: 4
+          checkpoint:
+            monitor: val_precision_long@L/5
+            mode: max
+            save_top_k: 1
+            save_last: false
+          early_stopping:
+            monitor: val_precision_long@L/5
+            patience: 10
+            mode: max
+        model:
+          _target_: esm2_unsupervised_baseline
+          name: esm2_unsupervised_baseline
+          backbone: facebook/esm2_t33_650M_UR50D
+          learning_rate: 0.005
+          weight_decay: 0.001
+        datamodule:
+          _target_: protein_datamodule
+          name: small number of sequences
+          batch_size: 1
+          num_workers: 4
+          max_seq_length: 1024
+          tokenizer_name: facebook/esm2_t33_650M_UR50D
+          include_b_factors: false
+          contact_threshold: 8.0
+          train_dataset_path: output/datasets/train.pt
+          val_dataset_path: output/datasets/val.pt
+          test_dataset_path: output/datasets/val.pt
+          sampler:
+            cluster_path: output/mmseqs/all_seqs_clust.tsv
+            train_n_pdb: 20
+            train_intersect_val_clusters: false
+            train_intersect_test_clusters: false
+            val_n_pdb: 100
+            test_n_pdb: 1.0
+            train_max_chains_per_pdb: 1
+            val_max_chains_per_pdb: 1
+        checkpoint_name: best
+        output_predictions_path: output/predictions/val.pkl
+    test:
+      script: src/predict.py
+      params:
+        trainer:
+          output_dir: output/train_checkpoints
+          max_epochs: 300
+          log_every_n_steps: 10
+          accumulate_grad_batches: 4
+          checkpoint:
+            monitor: val_precision_long@L/5
+            mode: max
+            save_top_k: 1
+            save_last: false
+          early_stopping:
+            monitor: val_precision_long@L/5
+            patience: 10
+            mode: max
+        model:
+          _target_: esm2_unsupervised_baseline
+          name: esm2_unsupervised_baseline
+          backbone: facebook/esm2_t33_650M_UR50D
+          learning_rate: 0.005
+          weight_decay: 0.001
+        datamodule:
+          _target_: protein_datamodule
+          name: small number of sequences
+          batch_size: 1
+          num_workers: 4
+          max_seq_length: 1024
+          tokenizer_name: facebook/esm2_t33_650M_UR50D
+          include_b_factors: false
+          contact_threshold: 8.0
+          train_dataset_path: output/datasets/train.pt
+          val_dataset_path: output/datasets/val.pt
+          test_dataset_path: output/datasets/test.pt
+          sampler:
+            cluster_path: output/mmseqs/all_seqs_clust.tsv
+            train_n_pdb: 20
+            train_intersect_val_clusters: false
+            train_intersect_test_clusters: false
+            val_n_pdb: 100
+            test_n_pdb: 1.0
+            train_max_chains_per_pdb: 1
+            val_max_chains_per_pdb: 1
+        checkpoint_name: best
+        output_predictions_path: output/predictions/test.pkl
 data_dir: ../data
 output_dir: output

@@ -4,7 +4,12 @@ Registry system for models and datamodules with automatic subgroup registration.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pprint import pformat
 from typing import Any, Callable, Dict, Tuple, Type
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class ModelRegistry:
@@ -35,6 +40,10 @@ class ModelRegistry:
                 f"Model '{name}' not registered. Available: {list(cls._models.keys())}"
             )
         model_class, _ = cls._models[name]
+        logger.info(
+            f"Initializing registered Model {config._target_}.\n"
+            f"With config named {config.name}:\n{pformat(config)}"
+        )
         return model_class(config)
 
     @classmethod
@@ -75,6 +84,10 @@ class DataModuleRegistry:
                 f"datamodule '{name}' not registered. Available: {list(cls._datamodules.keys())}"
             )
         datamodule_class, _ = cls._datamodules[name]
+        logger.info(
+            f"Initializing registered DataModule {config._target_}.\n"
+            f"With config named {config.name}:\n{pformat(config)}"
+        )
         return datamodule_class(config)
 
     @classmethod
@@ -88,7 +101,7 @@ class DataModuleRegistry:
 class BaseModelConfig:
     """Base class for all model configurations."""
 
-    __target__: str
+    _target_: str
     name: str
 
 
@@ -96,7 +109,7 @@ class BaseModelConfig:
 class BaseDataModuleConfig:
     """Base class for all datamodule configurations."""
 
-    __target__: str
+    _target_: str
     name: str
 
 
