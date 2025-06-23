@@ -88,7 +88,7 @@ class DataModuleRegistry:
 class BaseModelConfig:
     """Base class for all model configurations."""
 
-    __target__: str
+    _target_: str
     name: str
 
 
@@ -96,7 +96,7 @@ class BaseModelConfig:
 class BaseDataModuleConfig:
     """Base class for all datamodule configurations."""
 
-    __target__: str
+    _target_: str
     name: str
 
 
