@@ -1,0 +1,24 @@
+defaults:
+  - _self_
+
+_target_: "protein_datamodule"  # Reference to registered data module class
+name: "base" # Name of data module for better comparison
+batch_size: 32
+num_workers: 4
+max_seq_length: 1024
+tokenizer_name: ${model.backbone}
+include_b_factors: false
+contact_threshold: 8.0
+train_dataset_path: ${output_dir}/datasets/train.pt
+val_dataset_path: ${output_dir}/datasets/val.pt
+test_dataset_path: ${output_dir}/datasets/test.pt
+sampler:
+  cluster_path: ${output_dir}/mmseqs/all_seqs_clust.tsv
+  train_n_pdb: 1.0
+  train_intersect_val_clusters: false
+  train_intersect_test_clusters: false
+  val_n_pdb: 1.0
+  test_n_pdb: 1.0
+  # train_max_chains_per_pdb: null # they none by default
+  # val_max_chains_per_pdb: null
+  # test_max_chains_per_pdb: null

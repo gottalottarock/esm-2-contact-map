@@ -1,0 +1,11 @@
+defaults:
+  - base
+
+name: "small number of sequences"
+batch_size: 1
+sampler:
+  train_n_pdb: 20
+  val_n_pdb: 100
+  train_max_chains_per_pdb: 1
+  val_max_chains_per_pdb: 1
+  # test_max_chains_per_pdb: 1

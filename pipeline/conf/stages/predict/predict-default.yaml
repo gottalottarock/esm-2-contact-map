@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+
+script: src/predict.py
+params:
+  trainer: ${trainer}
+  model: ${model}
+  datamodule: ${datamodule}
+  checkpoint_name: best
+  output_predictions_path: ???

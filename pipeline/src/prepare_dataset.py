@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datamodules.dataset import ProteinSequenceDataset
 import logging
 from simple_parsing import ArgumentParser
+import utils.seed
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

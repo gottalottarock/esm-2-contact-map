@@ -1,0 +1,15 @@
+defaults:
+ - predict-default@val
+ - predict-default@test
+
+val:
+  params:
+    datamodule:
+      test_dataset_path: ${output_dir}/datasets/val.pt
+    output_predictions_path: ${output_dir}/predictions/val.pkl
+
+test:
+  params:
+    datamodule:
+      test_dataset_path: ${output_dir}/datasets/test.pt
+    output_predictions_path: ${output_dir}/predictions/test.pkl

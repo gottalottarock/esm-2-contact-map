@@ -13,7 +13,7 @@ import lightning as L
 import numpy as np
 import torch
 import torch.nn as nn
-from metrics import ContactPredictionMetrics
+from utils.metrics import ContactPredictionMetrics
 from registry import BaseModelConfig, register_model
 from transformers import EsmModel
 
@@ -23,7 +23,8 @@ class ESM2UnsupervisedBaselineConfig(BaseModelConfig):
     """Configuration for ESM2 attention-based baseline model (paper implementation)."""
 
     # Model backbone selection
-    name: str = "esm2_medium"  # esm2_small, esm2_medium, esm2_large
+    backbone: str
+    freeze_backbone: bool = True
 
     # Training parameters
     learning_rate: float = 1e-3
@@ -43,6 +44,8 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
 
         # Load ESM2 backbone (frozen)
         self.esm_model = EsmModel.from_pretrained(self.config.backbone)
+        if self.config.freeze_backbone:
+            self.freeze_backbone()
 
         # Get actual model dimensions from loaded model config
         self.num_layers = self.esm_model.config.num_hidden_layers
@@ -105,17 +108,17 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
         protein_attentions = combined_attentions[:, :, 1:-1, 1:-1]
 
         # Apply mask
-        masked_attentions = protein_attentions * mask_2d
+        protein_attentions = protein_attentions * mask_2d.unsqueeze(1)
 
         # Symmetrize: (A + A^T) / 2
-        symmetric_attentions = (
-            masked_attentions + masked_attentions.transpose(-1, -2)
+        protein_attentions = (
+            protein_attentions + protein_attentions.transpose(-1, -2)
         ) / 2
 
         # Apply APC correction
-        apc_corrected = self.apply_apc_correction(symmetric_attentions)
+        protein_attentions = self.apply_apc_correction(protein_attentions)
 
-        return apc_corrected
+        return protein_attentions
 
     def forward(self, input_ids, attention_mask, mask_2d):
         """Forward pass: extract attention maps + logistic regression."""
@@ -139,13 +142,17 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
     def create_mask(self, seq_lengths, max_length):
         """Create mask for valid positions (excluding padding)"""
         # Create basic sequence length mask
-        mask = torch.zeros(seq_lengths.shape[0], max_length, max_length)
+        mask_2d = torch.zeros(
+            seq_lengths.shape[0],
+            max_length,
+            max_length,
+            device=seq_lengths.device,
+            dtype=torch.bool,
+        )
         for i, length in enumerate(seq_lengths):
-            mask[i, :length, :length] = 1.0
+            mask_2d[i, :length, :length] = True
 
-        # Create 2D mask for broadcasting
-        mask_2d = mask.unsqueeze(1)
-        return mask, mask_2d
+        return mask_2d
 
     def compute_loss(self, contact_logits, contact_map, mask_2d):
         """Compute loss for valid positions"""
@@ -154,7 +161,8 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
 
         # Create lower triangular mask
         tril_mask = torch.tril(
-            torch.ones(seq_len, seq_len, device=mask_2d.device), diagonal=-1
+            torch.ones(seq_len, seq_len, device=mask_2d.device, dtype=torch.bool),
+            diagonal=-1,
         )
         tril_mask = tril_mask.unsqueeze(0).expand(batch_size, -1, -1).bool()
 
@@ -166,13 +174,16 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
 
     def training_step(self, batch, batch_idx):
         """Training step."""
+        if self.config.freeze_backbone:
+            self.esm_model.eval()
+
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         contact_map = batch["contact_maps"]
         seq_lengths = batch["seq_lengths"]
 
         max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask, mask_2d = self.create_mask(seq_lengths, max_length)
+        mask_2d = self.create_mask(seq_lengths, max_length)
 
         # Forward pass
         contact_logits = self(input_ids, attention_mask, mask_2d)
@@ -213,7 +224,7 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
         seq_lengths = batch["seq_lengths"]
 
         max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask, mask_2d = self.create_mask(seq_lengths, max_length)
+        mask_2d = self.create_mask(seq_lengths, max_length)
 
         # Forward pass
         contact_logits = self(input_ids, attention_mask, mask_2d)
@@ -239,9 +250,30 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
             )
             for metric_name in self.validation_step_outputs[0]["metrics"].keys()
         }
-        self.log("val_loss", loss)
+        self.log("val_loss", float(loss))
         for metric_name, metric_value in metrics.items():
-            self.log(f"val_{metric_name}", metric_value)
+            self.log(f"val_{metric_name}", float(metric_value))
+
+        # Clear validation outputs for next epoch
+        self.validation_step_outputs.clear()
+
+    def predict_step(self, batch, batch_idx):
+        """Prediction step for inference."""
+        input_ids = batch["input_ids"]
+        attention_mask = batch["attention_mask"]
+        seq_lengths = batch["seq_lengths"]
+
+        max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
+        mask_2d = self.create_mask(seq_lengths, max_length)
+
+        # Forward pass
+        contact_logits = self(input_ids, attention_mask, mask_2d)
+
+        return {
+            "contact_logits": contact_logits,
+            "mask_2d": mask_2d,
+            "metadata": batch["metadata"],
+        }
 
     def configure_optimizers(self):
         """Configure optimizers and schedulers."""
