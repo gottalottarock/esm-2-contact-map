@@ -29,6 +29,7 @@ class TrainerConfig:
     accumulate_grad_batches: int
     checkpoint: CheckpointConfig
     early_stopping: EarlyStoppingConfig
+    val_check_interval: int = 100
 
 
 def setup_logging(output_dir: Path) -> None:
@@ -65,7 +66,7 @@ def initialize_trainer(
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=config.output_dir / "checkpoints",
-        filename="{epoch}-%s={%s:.4f}" % (config.checkpoint.monitor.replace("/", "_"), config.checkpoint.monitor),
+        filename="{epoch}-{step}-%s={%s:.4f}" % (config.checkpoint.monitor.replace("/", "_"), config.checkpoint.monitor),
         monitor=config.checkpoint.monitor,
         mode=config.checkpoint.mode,
         save_top_k=config.checkpoint.save_top_k,
@@ -88,6 +89,7 @@ def initialize_trainer(
         logger=[wandb_logger, tensorboard_logger],
         callbacks=[checkpoint_callback, early_stopping],
         log_every_n_steps=config.log_every_n_steps,
+        val_check_interval=config.val_check_interval,
         reload_dataloaders_every_n_epochs=True,
         accumulate_grad_batches=config.accumulate_grad_batches,
     )
