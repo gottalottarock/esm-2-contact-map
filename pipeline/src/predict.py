@@ -28,6 +28,10 @@ class PredictConfig(TrainConfig):
     checkpoint_name: str = "best"
     output_predictions_path: Optional[str] = None
 
+class PredictionsDataset:
+    pass
+
+
 
 def find_best_checkpoint(checkpoint_dir: str | Path, metric: str, mode: str) -> Path:
     """Find the best checkpoint in the checkpoint directory."""

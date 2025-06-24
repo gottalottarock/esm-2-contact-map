@@ -91,33 +91,30 @@ class ESM2UnsupervisedBaseline(L.LightningModule):
 
         return F_apc
 
-    def extract_and_process_attention_maps(self, input_ids, attention_mask, mask_2d):
-        """Extract attention maps from ESM2 and apply processing tensorized."""
-
+    def run_backbone(self, input_ids, attention_mask):
+        """Run the backbone model."""
         outputs = self.esm_model(
             input_ids=input_ids,
             attention_mask=attention_mask,
             output_attentions=True,
         )
         # combine all attention maps at once: (batch_size, num_layers * num_heads, seq_len, seq_len)
-        combined_attentions = torch.cat(outputs.attentions, dim=1)
+        protein_attentions = torch.cat(outputs.attentions, dim=1)[:, :, 1:-1, 1:-1]
+        return protein_attentions
 
-        # Remove CLS token (first position), keep up to max protein sequence length
-        # For each sequence: [CLS, AA1, AA2, ..., AAn, EOS, PAD, ...]
-        # We want: [AA1, AA2, ..., AAn]
-        protein_attentions = combined_attentions[:, :, 1:-1, 1:-1]
+    def symmetrize(self, attention_maps):
+        """Symmetrize the attention maps."""
+        return (attention_maps + attention_maps.transpose(-1, -2)) / 2
 
+    def extract_and_process_attention_maps(self, input_ids, attention_mask, mask_2d):
+        """Extract attention maps from ESM2 and apply processing tensorized."""
+        protein_attentions = self.run_backbone(input_ids, attention_mask)
         # Apply mask
         protein_attentions = protein_attentions * mask_2d.unsqueeze(1)
-
-        # Symmetrize: (A + A^T) / 2
-        protein_attentions = (
-            protein_attentions + protein_attentions.transpose(-1, -2)
-        ) / 2
-
-        # Apply APC correction
-        protein_attentions = self.apply_apc_correction(protein_attentions)
-
+        # Symmetrize: (A + A^T) / 2 and apc correction
+        protein_attentions = self.apply_apc_correction(
+            self.symmetrize(protein_attentions)
+        )
         return protein_attentions
 
     def forward(self, input_ids, attention_mask, mask_2d):

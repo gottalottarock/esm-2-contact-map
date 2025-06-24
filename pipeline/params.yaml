@@ -6,7 +6,7 @@ model:
   weight_decay: 0.001
 datamodule:
   _target_: protein_datamodule
-  name: small number of sequences
+  name: all seqs
   batch_size: 1
   num_workers: 4
   max_seq_length: 1024
@@ -18,10 +18,10 @@ datamodule:
   test_dataset_path: output/datasets/test.pt
   sampler:
     cluster_path: output/mmseqs/all_seqs_clust.tsv
-    train_n_pdb: 20
-    train_intersect_val_clusters: false
-    train_intersect_test_clusters: false
-    val_n_pdb: 100
+    train_n_pdb: 1.0
+    train_intersect_val_clusters: true
+    train_intersect_test_clusters: true
+    val_n_pdb: 1.0
     test_n_pdb: 1.0
     train_max_chains_per_pdb: 1
     val_max_chains_per_pdb: 1
@@ -129,7 +129,7 @@ stages:
         weight_decay: 0.001
       datamodule:
         _target_: protein_datamodule
-        name: small number of sequences
+        name: all seqs
         batch_size: 1
         num_workers: 4
         max_seq_length: 1024
@@ -141,10 +141,10 @@ stages:
         test_dataset_path: output/datasets/test.pt
         sampler:
           cluster_path: output/mmseqs/all_seqs_clust.tsv
-          train_n_pdb: 20
-          train_intersect_val_clusters: false
-          train_intersect_test_clusters: false
-          val_n_pdb: 100
+          train_n_pdb: 1.0
+          train_intersect_val_clusters: true
+          train_intersect_test_clusters: true
+          val_n_pdb: 1.0
           test_n_pdb: 1.0
           train_max_chains_per_pdb: 1
           val_max_chains_per_pdb: 1
@@ -174,7 +174,7 @@ stages:
           weight_decay: 0.001
         datamodule:
           _target_: protein_datamodule
-          name: small number of sequences
+          name: all seqs
           batch_size: 1
           num_workers: 4
           max_seq_length: 1024
@@ -186,10 +186,10 @@ stages:
           test_dataset_path: output/datasets/val.pt
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
-            train_n_pdb: 20
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
-            val_n_pdb: 100
+            train_n_pdb: 1.0
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
+            val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
             val_max_chains_per_pdb: 1
@@ -220,7 +220,7 @@ stages:
           weight_decay: 0.001
         datamodule:
           _target_: protein_datamodule
-          name: small number of sequences
+          name: all seqs
           batch_size: 1
           num_workers: 4
           max_seq_length: 1024
@@ -232,10 +232,10 @@ stages:
           test_dataset_path: output/datasets/test.pt
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
-            train_n_pdb: 20
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
-            val_n_pdb: 100
+            train_n_pdb: 1.0
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
+            val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
             val_max_chains_per_pdb: 1
