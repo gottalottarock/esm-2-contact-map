@@ -2,6 +2,7 @@ import logging
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Optional
 
 import lightning as L
 import yaml
@@ -30,7 +31,8 @@ class TrainerConfig:
     checkpoint: CheckpointConfig
     early_stopping: EarlyStoppingConfig
     val_check_interval: int = 100
-
+    device: Optional[int] = None
+    init_wandb: bool = True
 
 def setup_logging(output_dir: Path) -> None:
     logging.basicConfig(
@@ -52,17 +54,20 @@ def initialize_trainer(
         config_dict = yaml.safe_load(file)
 
     experiment_name = os.environ.get("DVC_EXP_NAME", None)  # if not dvc, than random
-
-    wandb_logger = WandbLogger(
-        project="deep-origin-task",
-        name=experiment_name,
-        log_model=False,
-        config=config_dict,
-    )
+    loggers = []
+    if config.init_wandb:
+        wandb_logger = WandbLogger(
+            project="deep-origin-task",
+            name=experiment_name,
+            log_model=False,
+            config=config_dict,
+        )
+        loggers.append(wandb_logger)
 
     tensorboard_logger = TensorBoardLogger(
         save_dir=config.output_dir, name=experiment_name
     )
+    loggers.append(tensorboard_logger)
 
     checkpoint_callback = ModelCheckpoint(
         dirpath=config.output_dir / "checkpoints",
@@ -82,11 +87,16 @@ def initialize_trainer(
         verbose=True,
     )
 
+    if config.device is not None:
+        devices = [config.device]
+    else:
+        devices = 1
+
     trainer = L.Trainer(
         max_epochs=config.max_epochs,
         accelerator="gpu",
-        devices=1,
-        logger=[wandb_logger, tensorboard_logger],
+        devices=devices,
+        logger=loggers,
         callbacks=[checkpoint_callback, early_stopping],
         log_every_n_steps=config.log_every_n_steps,
         val_check_interval=config.val_check_interval,

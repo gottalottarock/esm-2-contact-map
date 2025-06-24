@@ -17,6 +17,7 @@ from datamodules import *
 # Import modules to register models and datamodules BEFORE using them
 from models import *
 from simple_parsing import ArgumentGenerationMode, ArgumentParser, NestedMode
+from utils.gpu_lock_runner import lock_free_gpu
 from train import TrainConfig, init_all
 
 logging.basicConfig(level=logging.INFO)
@@ -50,21 +51,22 @@ def find_best_checkpoint(checkpoint_dir: str | Path, metric: str, mode: str) -> 
 
 
 def main(cfg: PredictConfig):
-    model, datamodule, trainer = init_all(cfg)
-    datamodule.setup("test")
-    if cfg.checkpoint_name == "best":
-        checkpoint_path = find_best_checkpoint(
-            Path(cfg.trainer.output_dir) / "checkpoints", cfg.trainer.checkpoint.monitor, cfg.trainer.checkpoint.mode
-        )
-    else:
-        checkpoint_path = Path(cfg.trainer.output_dir) / "checkpoints" / f"{cfg.checkpoint_name}.ckpt"
-    logger.info(f"Loading checkpoint from {checkpoint_path}")
-    model.load_state_dict(torch.load(checkpoint_path, weights_only=False)["state_dict"])
-    predictions = trainer.predict(model, datamodule)
-    if cfg.output_predictions_path is None:
-        raise ValueError("output_predictions_path is required")
-    with open(cfg.output_predictions_path, "wb") as f:
-        pickle.dump(predictions, f)
+    with lock_free_gpu() as device:
+        model, datamodule, trainer = init_all(cfg, device=device)
+        datamodule.setup("test")
+        if cfg.checkpoint_name == "best":
+            checkpoint_path = find_best_checkpoint(
+                Path(cfg.trainer.output_dir) / "checkpoints", cfg.trainer.checkpoint.monitor, cfg.trainer.checkpoint.mode
+            )
+        else:
+            checkpoint_path = Path(cfg.trainer.output_dir) / "checkpoints" / f"{cfg.checkpoint_name}.ckpt"
+        logger.info(f"Loading checkpoint from {checkpoint_path}")
+        model.load_state_dict(torch.load(checkpoint_path, weights_only=False)["state_dict"])
+        predictions = trainer.predict(model, datamodule)
+        if cfg.output_predictions_path is None:
+            raise ValueError("output_predictions_path is required")
+        with open(cfg.output_predictions_path, "wb") as f:
+            pickle.dump(predictions, f)
 
 
 if __name__ == "__main__":
