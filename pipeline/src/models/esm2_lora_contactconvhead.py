@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import torch
 import torch.nn as nn
-from esm2_lora_contacthead import ESM2LoRAContact, ESM2LoRAContactConfig
+from models.esm2_lora_contacthead import ESM2LoRAContact, ESM2LoRAContactConfig
 from registry import register_model
 
 

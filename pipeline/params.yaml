@@ -1,6 +1,6 @@
 model:
-  _target_: esm2_lora_contact
-  name: base esm2 lora
+  _target_: esm2_lora_contactconv
+  name: esm2 lora with conv refiner
   backbone: facebook/esm2_t33_650M_UR50D
   lora_rank: 8
   lora_alpha: 16
@@ -12,6 +12,7 @@ model:
   contact_head_dim: 4
   learning_rate: 0.0005
   weight_decay: 0.0001
+  cnn_kernel_size: 7
 datamodule:
   _target_: protein_datamodule
   name: all seqs
@@ -132,8 +133,8 @@ stages:
           patience: 10
           mode: max
       model:
-        _target_: esm2_lora_contact
-        name: base esm2 lora
+        _target_: esm2_lora_contactconv
+        name: esm2 lora with conv refiner
         backbone: facebook/esm2_t33_650M_UR50D
         lora_rank: 8
         lora_alpha: 16
@@ -145,6 +146,7 @@ stages:
         contact_head_dim: 4
         learning_rate: 0.0005
         weight_decay: 0.0001
+        cnn_kernel_size: 7
       datamodule:
         _target_: protein_datamodule
         name: all seqs
@@ -186,8 +188,8 @@ stages:
             patience: 10
             mode: max
         model:
-          _target_: esm2_lora_contact
-          name: base esm2 lora
+          _target_: esm2_lora_contactconv
+          name: esm2 lora with conv refiner
           backbone: facebook/esm2_t33_650M_UR50D
           lora_rank: 8
           lora_alpha: 16
@@ -199,6 +201,7 @@ stages:
           contact_head_dim: 4
           learning_rate: 0.0005
           weight_decay: 0.0001
+          cnn_kernel_size: 7
         datamodule:
           _target_: protein_datamodule
           name: all seqs
@@ -241,8 +244,8 @@ stages:
             patience: 10
             mode: max
         model:
-          _target_: esm2_lora_contact
-          name: base esm2 lora
+          _target_: esm2_lora_contactconv
+          name: esm2 lora with conv refiner
           backbone: facebook/esm2_t33_650M_UR50D
           lora_rank: 8
           lora_alpha: 16
@@ -254,6 +257,7 @@ stages:
           contact_head_dim: 4
           learning_rate: 0.0005
           weight_decay: 0.0001
+          cnn_kernel_size: 7
         datamodule:
           _target_: protein_datamodule
           name: all seqs
