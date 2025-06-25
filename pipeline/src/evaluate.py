@@ -44,6 +44,7 @@ def get_wandb_run_id(wandb_run_dir: Optional[str], output_dir: str) -> Optional[
     """Get WandB run ID from latest-run file."""
     if wandb_run_dir:
         latest_run_path = Path(wandb_run_dir) / "latest-run"
+        all_runs = list(Path(wandb_run_dir).glob("run-*"))
     else:
         latest_run_path = (
             Path(output_dir).parent / "train_checkpoints" / "wandb" / "latest-run"
@@ -56,6 +57,10 @@ def get_wandb_run_id(wandb_run_dir: Optional[str], output_dir: str) -> Optional[
         else:
             with open(latest_run_path, "r") as f:
                 run_id = f.read().strip().split("-")[-1]
+        logger.info(f"Found WandB run ID: {run_id}")
+        return run_id
+    elif len(all_runs) == 1:
+        run_id = all_runs[0].stem.split("-")[-1]
         logger.info(f"Found WandB run ID: {run_id}")
         return run_id
     else:
