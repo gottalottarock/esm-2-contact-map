@@ -1,2 +1,3 @@
 from models.baseline_unsupervised import ESM2UnsupervisedBaseline, ESM2UnsupervisedBaselineConfig
 from models.esm2_lora_contacthead import ESM2LoRAContact, ESM2LoRAContactConfig
+from models.esm2_lora_contactconvhead import ESM2LoRAContactConv, ESM2LoRAContactConvConfig

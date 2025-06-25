@@ -1,0 +1,10 @@
+defaults: 
+  - esm2_lora_contact_650m
+
+loss:
+  loss_type: focal
+  focal_gamma: 2.0
+  focal_alpha: 0.9
+
+learning_rate: 5e-4  # Lower learning rate for larger model
+weight_decay: 1e-4 

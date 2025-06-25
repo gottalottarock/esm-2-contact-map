@@ -9,6 +9,7 @@ from utils.metrics import ContactPredictionMetrics
 from registry import BaseModelConfig, register_model
 from transformers import EsmModel
 from peft import LoraConfig, get_peft_model, TaskType
+from torchvision.ops.focal_loss import sigmoid_focal_loss
 
 
 class ContactHead(nn.Module):
@@ -75,15 +76,22 @@ class ContactHead(nn.Module):
 
 
 @dataclass
+class LossConfig:
+    loss_type: str = "bce"  # bce or focal
+    focal_gamma: float = 2.0
+    focal_alpha: float = -1
+
+
+@dataclass
 class ESM2LoRAContactConfig(BaseModelConfig):
     """Configuration for ESM2 with LoRA adapters for contact prediction."""
 
     # Model backbone selection
     backbone: str
+    loss: LossConfig
 
     # if true, will not use LoRA
     wo_lora: bool = False
-
     # LoRA parameters
     lora_rank: int = 8
     lora_alpha: int = 16  # 2*rnak
@@ -98,6 +106,19 @@ class ESM2LoRAContactConfig(BaseModelConfig):
     # Training parameters
     learning_rate: float = 2e-5
     weight_decay: float = 0.01
+    
+
+
+class SigmoidFocalLoss(nn.Module):
+    def __init__(self, gamma: float = 2.0, alpha: float = 0.9, reduction: str = "mean"):
+        super(SigmoidFocalLoss, self).__init__()
+        self.gamma = gamma
+        self.alpha = alpha
+        self.reduction = reduction
+
+    def forward(self, input, target):
+        loss = sigmoid_focal_loss(input, target, gamma=self.gamma, alpha=self.alpha, reduction=self.reduction)
+        return loss
 
 
 @register_model("esm2_lora_contact", ESM2LoRAContactConfig)
@@ -130,18 +151,26 @@ class ESM2LoRAContact(L.LightningModule):
         self.freeze_backbone()
 
         # Contact prediction head
-        embed_dim = self.esm_model.config.hidden_size
-        self.contact_head = ContactHead(
-            embed_dim=embed_dim, num_heads=self.config.contact_head_dim
-        )
+        self.init_contact_head()
 
         # Loss function
-        self.loss_fn = nn.BCEWithLogitsLoss()
+        if self.config.loss.loss_type == "bce":
+            self.loss_fn = nn.BCEWithLogitsLoss()
+        elif self.config.loss.loss_type == "focal":
+            self.loss_fn = SigmoidFocalLoss(gamma=self.config.loss.focal_gamma, alpha=self.config.loss.focal_alpha)
+        else:
+            raise ValueError(f"Invalid loss type: {self.config.loss.loss_type}")
 
         # Initialize metrics calculator
         self.contact_metrics = ContactPredictionMetrics()
 
         self.validation_step_outputs = []
+
+    def init_contact_head(self):
+        embed_dim = self.esm_model.config.hidden_size
+        self.contact_head = ContactHead(
+            embed_dim=embed_dim, num_heads=self.config.contact_head_dim
+        )
 
     def freeze_backbone(self):
         """Freeze the backbone model (but keep LoRA adapters trainable)."""
