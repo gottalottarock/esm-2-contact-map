@@ -302,7 +302,7 @@ stages:
     cmd: python src/evaluate.py --dataset_path output/datasets/val.pt 
       --predictions_path output/predictions/val.pkl --clusters_path 
       output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/val 
-      --fixed_visualization_ids train_7H6Y_C train_4J49_A train_6PR9_A 
+      --fixed_visualization_ids train_1YVY_A train_7SV6_A train_2ZCA_B 
       --wandb_run_dir output/train_checkpoints/wandb
     deps:
     - path: output/datasets/val.pt
@@ -320,6 +320,6 @@ stages:
     outs:
     - path: output/evaluation/val
       hash: md5
-      md5: b217d2305f0b786040393dc486a59cfe.dir
-      size: 3598301
-      nfiles: 6
+      md5: 70cc8a0fc9b38b2a53f46a6639cb3405.dir
+      size: 6068450
+      nfiles: 7
