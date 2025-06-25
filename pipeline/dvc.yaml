@@ -63,11 +63,14 @@ stages:
       outs:
         - ${item.params.output_predictions_path}
 
-  # evaluate:
-  #   cmd: python ${stages.evaluate.script} ${stages.evaluate.params}
-  #   deps:
-  #     - ${stages.evaluate.script}
-  #     - ${stages.evaluate.params.checkpoint_path}
-  #     - ${stages.evaluate.params.test_dataset_path}
-  #   outs:
-  #     - ${stages.evaluate.params.results_dir}/
+  evaluate:
+    foreach: ${stages.evaluate}
+    do:
+      cmd: python ${item.script} ${item.params}
+      deps:
+        - ${item.params.dataset_path}
+        - ${item.params.predictions_path}
+        - ${item.params.clusters_path}
+      outs:
+        - ${item.params.output_dir}
+

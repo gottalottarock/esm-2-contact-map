@@ -1,6 +1,6 @@
 defaults:
-  - model: baseline_unsupervised
-  - datamodule: base_20seq
+  - model: esm2_lora_contact_650m
+  - datamodule: base_allseq
   - trainer: trainer
   - stages/parse_pdb: parse_pdb
   - stages/mmseqs2: mmseqs2
@@ -8,7 +8,7 @@ defaults:
   - stages/prepare_dataset: prepare_dataset
   - stages/train: train
   - stages/predict: predict
-  # - stages/evaluate: evaluate
+  - stages/evaluate: evaluate
   - _self_
 
 # Global paths

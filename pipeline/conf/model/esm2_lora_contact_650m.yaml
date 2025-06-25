@@ -1,0 +1,23 @@
+
+defaults:
+  - _self_
+
+
+_target_: esm2_lora_contact
+name:  "base esm2 lora"
+
+# Model backbone - larger model
+backbone: facebook/esm2_t33_650M_UR50D
+
+# LoRA parameters
+lora_rank: 8
+lora_alpha: 16
+lora_dropout: 0.1
+target_modules: ["query", "key", "value"]  # Target attention layers
+
+# Contact head parameters
+contact_head_dim: 4  # todo: Larger head for bigger model
+
+# Training parameters
+learning_rate: 5e-5  # Lower learning rate for larger model
+weight_decay: 1e-4 

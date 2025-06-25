@@ -1,30 +1,23 @@
 defaults:
   - _self_
 
-script: src/evaluate.py
-params:
-  # Model checkpoint path
-  checkpoint_path: ${output_dir}/checkpoints/best_model.ckpt
-  
-  # Data paths
-  test_dataset_path: ${output_dir}/datasets/test.pt
-  
-  # Output paths
-  results_dir: ${output_dir}/evaluation
-  predictions_path: ${output_dir}/evaluation/predictions.csv
-  metrics_path: ${output_dir}/evaluation/metrics.json
-  
-  # Use global dataloader settings (but smaller batch for evaluation)
-  dataloader: ${dataloader}
+'val':
+  script: src/evaluate.py
+  params:
+    # Data paths
+    dataset_path: ${output_dir}/datasets/val.pt
+    predictions_path: ${output_dir}/predictions/val.pkl
+    clusters_path: ${output_dir}/mmseqs/all_seqs_clust.tsv
     
-  # Evaluation specific settings
-  metrics:
-    - precision
-    - recall  
-    - f1_score
-    - accuracy
-    - contact_precision_at_k: [1, 5, 10]
+    # Output directory
+    output_dir: ${output_dir}/evaluation/val
     
-  visualize:
-    num_samples: 10
-    save_contact_maps: true 
+    # Fixed IDs for visualization (optional)
+    fixed_visualization_ids:
+      - "train_7H6Y_C" 
+      - "train_4J49_A"
+      - "train_6PR9_A"
+    
+    # WandB settings
+    wo_wandb: false
+    wandb_run_dir: ${trainer.output_dir}/wandb

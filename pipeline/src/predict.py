@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 class PredictConfig(TrainConfig):
     checkpoint_name: str = "best"
     output_predictions_path: Optional[str] = None
+    init_wandb: bool = False
 
 
 def find_best_checkpoint(checkpoint_dir: str | Path, metric: str, mode: str) -> Path:
@@ -52,6 +53,7 @@ def find_best_checkpoint(checkpoint_dir: str | Path, metric: str, mode: str) -> 
 
 def main(cfg: PredictConfig):
     with lock_free_gpu() as device:
+        cfg.trainer.init_wandb = cfg.init_wandb
         model, datamodule, trainer = init_all(cfg, device=device)
         datamodule.setup("test")
         if cfg.checkpoint_name == "best":

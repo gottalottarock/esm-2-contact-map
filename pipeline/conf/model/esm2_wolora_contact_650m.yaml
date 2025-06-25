@@ -1,0 +1,7 @@
+defaults: 
+  - esm2_lora_contact_650m
+
+wo_lora: true
+
+learning_rate: 5e-3  # Lower learning rate for larger model
+weight_decay: 1e-4 

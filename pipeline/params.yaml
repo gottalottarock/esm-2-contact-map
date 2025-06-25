@@ -1,13 +1,22 @@
 model:
-  _target_: esm2_unsupervised_baseline
-  name: esm2_unsupervised_baseline
+  _target_: esm2_lora_contact
+  name: base esm2 lora
   backbone: facebook/esm2_t33_650M_UR50D
+  lora_rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.1
+  target_modules:
+  - query
+  - key
+  - value
+  contact_head_dim: 4
   learning_rate: 0.005
-  weight_decay: 0.001
+  weight_decay: 0.0001
+  wo_lora: true
 datamodule:
   _target_: protein_datamodule
-  name: small number of sequences
-  batch_size: 1
+  name: all seqs
+  batch_size: 4
   num_workers: 4
   max_seq_length: 1024
   tokenizer_name: facebook/esm2_t33_650M_UR50D
@@ -18,10 +27,10 @@ datamodule:
   test_dataset_path: output/datasets/test.pt
   sampler:
     cluster_path: output/mmseqs/all_seqs_clust.tsv
-    train_n_pdb: 20
-    train_intersect_val_clusters: false
-    train_intersect_test_clusters: false
-    val_n_pdb: 100
+    train_n_pdb: 1.0
+    train_intersect_val_clusters: true
+    train_intersect_test_clusters: true
+    val_n_pdb: 1.0
     test_n_pdb: 1.0
     train_max_chains_per_pdb: 1
     val_max_chains_per_pdb: 1
@@ -29,7 +38,8 @@ trainer:
   output_dir: output/train_checkpoints
   max_epochs: 300
   log_every_n_steps: 10
-  accumulate_grad_batches: 4
+  accumulate_grad_batches: 1
+  val_check_interval: 300
   checkpoint:
     monitor: val_precision_long@L/5
     mode: max
@@ -111,7 +121,8 @@ stages:
         output_dir: output/train_checkpoints
         max_epochs: 300
         log_every_n_steps: 10
-        accumulate_grad_batches: 4
+        accumulate_grad_batches: 1
+        val_check_interval: 300
         checkpoint:
           monitor: val_precision_long@L/5
           mode: max
@@ -122,15 +133,24 @@ stages:
           patience: 10
           mode: max
       model:
-        _target_: esm2_unsupervised_baseline
-        name: esm2_unsupervised_baseline
+        _target_: esm2_lora_contact
+        name: base esm2 lora
         backbone: facebook/esm2_t33_650M_UR50D
+        lora_rank: 8
+        lora_alpha: 16
+        lora_dropout: 0.1
+        target_modules:
+        - query
+        - key
+        - value
+        contact_head_dim: 4
         learning_rate: 0.005
-        weight_decay: 0.001
+        weight_decay: 0.0001
+        wo_lora: true
       datamodule:
         _target_: protein_datamodule
-        name: small number of sequences
-        batch_size: 1
+        name: all seqs
+        batch_size: 4
         num_workers: 4
         max_seq_length: 1024
         tokenizer_name: facebook/esm2_t33_650M_UR50D
@@ -141,10 +161,10 @@ stages:
         test_dataset_path: output/datasets/test.pt
         sampler:
           cluster_path: output/mmseqs/all_seqs_clust.tsv
-          train_n_pdb: 20
-          train_intersect_val_clusters: false
-          train_intersect_test_clusters: false
-          val_n_pdb: 100
+          train_n_pdb: 1.0
+          train_intersect_val_clusters: true
+          train_intersect_test_clusters: true
+          val_n_pdb: 1.0
           test_n_pdb: 1.0
           train_max_chains_per_pdb: 1
           val_max_chains_per_pdb: 1
@@ -156,7 +176,8 @@ stages:
           output_dir: output/train_checkpoints
           max_epochs: 300
           log_every_n_steps: 10
-          accumulate_grad_batches: 4
+          accumulate_grad_batches: 1
+          val_check_interval: 300
           checkpoint:
             monitor: val_precision_long@L/5
             mode: max
@@ -167,15 +188,24 @@ stages:
             patience: 10
             mode: max
         model:
-          _target_: esm2_unsupervised_baseline
-          name: esm2_unsupervised_baseline
+          _target_: esm2_lora_contact
+          name: base esm2 lora
           backbone: facebook/esm2_t33_650M_UR50D
+          lora_rank: 8
+          lora_alpha: 16
+          lora_dropout: 0.1
+          target_modules:
+          - query
+          - key
+          - value
+          contact_head_dim: 4
           learning_rate: 0.005
-          weight_decay: 0.001
+          weight_decay: 0.0001
+          wo_lora: true
         datamodule:
           _target_: protein_datamodule
-          name: small number of sequences
-          batch_size: 1
+          name: all seqs
+          batch_size: 4
           num_workers: 4
           max_seq_length: 1024
           tokenizer_name: facebook/esm2_t33_650M_UR50D
@@ -186,10 +216,10 @@ stages:
           test_dataset_path: output/datasets/val.pt
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
-            train_n_pdb: 20
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
-            val_n_pdb: 100
+            train_n_pdb: 1.0
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
+            val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
             val_max_chains_per_pdb: 1
@@ -200,9 +230,10 @@ stages:
       params:
         trainer:
           output_dir: output/train_checkpoints
-          max_epochs: 300
+          max_epochs: 10
           log_every_n_steps: 10
-          accumulate_grad_batches: 4
+          accumulate_grad_batches: 1
+          val_check_interval: 300
           checkpoint:
             monitor: val_precision_long@L/5
             mode: max
@@ -213,15 +244,24 @@ stages:
             patience: 10
             mode: max
         model:
-          _target_: esm2_unsupervised_baseline
-          name: esm2_unsupervised_baseline
+          _target_: esm2_lora_contact
+          name: base esm2 lora
           backbone: facebook/esm2_t33_650M_UR50D
+          lora_rank: 8
+          lora_alpha: 16
+          lora_dropout: 0.1
+          target_modules:
+          - query
+          - key
+          - value
+          contact_head_dim: 4
           learning_rate: 0.005
-          weight_decay: 0.001
+          weight_decay: 0.0001
+          wo_lora: true
         datamodule:
           _target_: protein_datamodule
-          name: small number of sequences
-          batch_size: 1
+          name: all seqs
+          batch_size: 4
           num_workers: 4
           max_seq_length: 1024
           tokenizer_name: facebook/esm2_t33_650M_UR50D
@@ -232,14 +272,28 @@ stages:
           test_dataset_path: output/datasets/test.pt
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
-            train_n_pdb: 20
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
-            val_n_pdb: 100
+            train_n_pdb: 1.0
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
+            val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
             val_max_chains_per_pdb: 1
         checkpoint_name: best
         output_predictions_path: output/predictions/test.pkl
+  evaluate:
+    val:
+      script: src/evaluate.py
+      params:
+        dataset_path: output/datasets/val.pt
+        predictions_path: output/predictions/val.pkl
+        clusters_path: output/mmseqs/all_seqs_clust.tsv
+        output_dir: output/evaluation/val
+        fixed_visualization_ids:
+        - train_7H6Y_C
+        - train_4J49_A
+        - train_6PR9_A
+        wo_wandb: false
+        wandb_run_dir: output/train_checkpoints/wandb
 data_dir: ../data
 output_dir: output
