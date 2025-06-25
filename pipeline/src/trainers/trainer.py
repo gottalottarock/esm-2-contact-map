@@ -1,4 +1,5 @@
 import logging
+import json
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -58,6 +59,7 @@ def initialize_trainer(
     if config.init_wandb:
         wandb_logger = WandbLogger(
             project="deep-origin-task",
+            dir=config.output_dir,
             name=experiment_name,
             log_model=False,
             config=config_dict,

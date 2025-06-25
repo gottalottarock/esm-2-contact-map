@@ -2,7 +2,7 @@ defaults:
   - base
 
 name: "all seqs"
-batch_size: 2
+batch_size: 4
 sampler:
   train_n_pdb: 1.0
   train_intersect_val_clusters: true

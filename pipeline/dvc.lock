@@ -184,23 +184,24 @@ stages:
     cmd: python src/train.py --model esm2_unsupervised_baseline --datamodule 
       protein_datamodule --trainer.output_dir output/train_checkpoints 
       --trainer.max_epochs 300 --trainer.log_every_n_steps 10 
-      --trainer.accumulate_grad_batches 4 --trainer.checkpoint.monitor 
-      val_precision_long@L/5 --trainer.checkpoint.mode max 
-      --trainer.checkpoint.save_top_k 1 --trainer.early_stopping.monitor 
-      val_precision_long@L/5 --trainer.early_stopping.patience 10 
-      --trainer.early_stopping.mode max --model._target_ 
-      esm2_unsupervised_baseline --model.name esm2_unsupervised_baseline 
-      --model.backbone facebook/esm2_t33_650M_UR50D --model.learning_rate 0.005 
-      --model.weight_decay 0.001 --datamodule._target_ protein_datamodule 
-      --datamodule.name 'small number of sequences' --datamodule.batch_size 1 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
-      --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
-      --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
-      output/datasets/train.pt --datamodule.val_dataset_path 
-      output/datasets/val.pt --datamodule.test_dataset_path 
-      output/datasets/test.pt --datamodule.sampler.cluster_path 
-      output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 20 
-      --datamodule.sampler.val_n_pdb 100 --datamodule.sampler.test_n_pdb 1.0 
+      --trainer.accumulate_grad_batches 2 --trainer.val_check_interval 300 
+      --trainer.checkpoint.monitor val_precision_long@L/5 
+      --trainer.checkpoint.mode max --trainer.checkpoint.save_top_k 1 
+      --trainer.early_stopping.monitor val_precision_long@L/5 
+      --trainer.early_stopping.patience 10 --trainer.early_stopping.mode max 
+      --model._target_ esm2_unsupervised_baseline --model.name 
+      esm2_unsupervised_baseline --model.backbone facebook/esm2_t33_650M_UR50D 
+      --model.learning_rate 0.005 --model.weight_decay 0.001 
+      --datamodule._target_ protein_datamodule --datamodule.name '1 seq from pdb
+      except cluster' --datamodule.batch_size 2 --datamodule.num_workers 4 
+      --datamodule.max_seq_length 1024 --datamodule.tokenizer_name 
+      facebook/esm2_t33_650M_UR50D --datamodule.contact_threshold 8.0 
+      --datamodule.train_dataset_path output/datasets/train.pt 
+      --datamodule.val_dataset_path output/datasets/val.pt 
+      --datamodule.test_dataset_path output/datasets/test.pt 
+      --datamodule.sampler.cluster_path output/mmseqs/all_seqs_clust.tsv 
+      --datamodule.sampler.train_n_pdb 1.0 --datamodule.sampler.val_n_pdb 1.0 
+      --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1
     deps:
@@ -215,30 +216,31 @@ stages:
     outs:
     - path: output/train_checkpoints
       hash: md5
-      md5: 4e0ebb7daa933fef0fcd6f13b4fce624.dir
-      size: 2604586046
+      md5: 8321f8631ce763da8596d63f76300291.dir
+      size: 2604663751
       nfiles: 4
   predict@val:
     cmd: python src/predict.py --model esm2_unsupervised_baseline --datamodule 
       protein_datamodule --trainer.output_dir output/train_checkpoints 
       --trainer.max_epochs 300 --trainer.log_every_n_steps 10 
-      --trainer.accumulate_grad_batches 4 --trainer.checkpoint.monitor 
-      val_precision_long@L/5 --trainer.checkpoint.mode max 
-      --trainer.checkpoint.save_top_k 1 --trainer.early_stopping.monitor 
-      val_precision_long@L/5 --trainer.early_stopping.patience 10 
-      --trainer.early_stopping.mode max --model._target_ 
-      esm2_unsupervised_baseline --model.name esm2_unsupervised_baseline 
-      --model.backbone facebook/esm2_t33_650M_UR50D --model.learning_rate 0.005 
-      --model.weight_decay 0.001 --datamodule._target_ protein_datamodule 
-      --datamodule.name 'small number of sequences' --datamodule.batch_size 1 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
-      --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
-      --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
-      output/datasets/train.pt --datamodule.val_dataset_path 
-      output/datasets/val.pt --datamodule.test_dataset_path 
-      output/datasets/val.pt --datamodule.sampler.cluster_path 
-      output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 20 
-      --datamodule.sampler.val_n_pdb 100 --datamodule.sampler.test_n_pdb 1.0 
+      --trainer.accumulate_grad_batches 2 --trainer.val_check_interval 300 
+      --trainer.checkpoint.monitor val_precision_long@L/5 
+      --trainer.checkpoint.mode max --trainer.checkpoint.save_top_k 1 
+      --trainer.early_stopping.monitor val_precision_long@L/5 
+      --trainer.early_stopping.patience 10 --trainer.early_stopping.mode max 
+      --model._target_ esm2_unsupervised_baseline --model.name 
+      esm2_unsupervised_baseline --model.backbone facebook/esm2_t33_650M_UR50D 
+      --model.learning_rate 0.005 --model.weight_decay 0.001 
+      --datamodule._target_ protein_datamodule --datamodule.name '1 seq from pdb
+      except cluster' --datamodule.batch_size 2 --datamodule.num_workers 4 
+      --datamodule.max_seq_length 1024 --datamodule.tokenizer_name 
+      facebook/esm2_t33_650M_UR50D --datamodule.contact_threshold 8.0 
+      --datamodule.train_dataset_path output/datasets/train.pt 
+      --datamodule.val_dataset_path output/datasets/val.pt 
+      --datamodule.test_dataset_path output/datasets/val.pt 
+      --datamodule.sampler.cluster_path output/mmseqs/all_seqs_clust.tsv 
+      --datamodule.sampler.train_n_pdb 1.0 --datamodule.sampler.val_n_pdb 1.0 
+      --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1 --checkpoint_name best 
       --output_predictions_path output/predictions/val.pkl
@@ -250,29 +252,30 @@ stages:
     outs:
     - path: output/predictions/val.pkl
       hash: md5
-      md5: b14783117068748bd8b409013a97d0d9
-      size: 325908612
+      md5: be4648673032de2e4a341156e3d3a466
+      size: 410625471
   predict@test:
     cmd: python src/predict.py --model esm2_unsupervised_baseline --datamodule 
       protein_datamodule --trainer.output_dir output/train_checkpoints 
       --trainer.max_epochs 300 --trainer.log_every_n_steps 10 
-      --trainer.accumulate_grad_batches 4 --trainer.checkpoint.monitor 
-      val_precision_long@L/5 --trainer.checkpoint.mode max 
-      --trainer.checkpoint.save_top_k 1 --trainer.early_stopping.monitor 
-      val_precision_long@L/5 --trainer.early_stopping.patience 10 
-      --trainer.early_stopping.mode max --model._target_ 
-      esm2_unsupervised_baseline --model.name esm2_unsupervised_baseline 
-      --model.backbone facebook/esm2_t33_650M_UR50D --model.learning_rate 0.005 
-      --model.weight_decay 0.001 --datamodule._target_ protein_datamodule 
-      --datamodule.name 'small number of sequences' --datamodule.batch_size 1 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
-      --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
-      --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
-      output/datasets/train.pt --datamodule.val_dataset_path 
-      output/datasets/val.pt --datamodule.test_dataset_path 
-      output/datasets/test.pt --datamodule.sampler.cluster_path 
-      output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 20 
-      --datamodule.sampler.val_n_pdb 100 --datamodule.sampler.test_n_pdb 1.0 
+      --trainer.accumulate_grad_batches 2 --trainer.val_check_interval 300 
+      --trainer.checkpoint.monitor val_precision_long@L/5 
+      --trainer.checkpoint.mode max --trainer.checkpoint.save_top_k 1 
+      --trainer.early_stopping.monitor val_precision_long@L/5 
+      --trainer.early_stopping.patience 10 --trainer.early_stopping.mode max 
+      --model._target_ esm2_unsupervised_baseline --model.name 
+      esm2_unsupervised_baseline --model.backbone facebook/esm2_t33_650M_UR50D 
+      --model.learning_rate 0.005 --model.weight_decay 0.001 
+      --datamodule._target_ protein_datamodule --datamodule.name '1 seq from pdb
+      except cluster' --datamodule.batch_size 2 --datamodule.num_workers 4 
+      --datamodule.max_seq_length 1024 --datamodule.tokenizer_name 
+      facebook/esm2_t33_650M_UR50D --datamodule.contact_threshold 8.0 
+      --datamodule.train_dataset_path output/datasets/train.pt 
+      --datamodule.val_dataset_path output/datasets/val.pt 
+      --datamodule.test_dataset_path output/datasets/test.pt 
+      --datamodule.sampler.cluster_path output/mmseqs/all_seqs_clust.tsv 
+      --datamodule.sampler.train_n_pdb 1.0 --datamodule.sampler.val_n_pdb 1.0 
+      --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1 --checkpoint_name best 
       --output_predictions_path output/predictions/test.pkl
@@ -284,5 +287,30 @@ stages:
     outs:
     - path: output/predictions/test.pkl
       hash: md5
-      md5: 6da12f1f23a06c17d833f50136a36a21
-      size: 423297844
+      md5: c536ca99d568abb18611a4d3fc835bde
+      size: 559268155
+  evaluate@val:
+    cmd: python src/evaluate.py --dataset_path output/datasets/val.pt 
+      --predictions_path output/predictions/val.pkl --clusters_path 
+      output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/val 
+      --fixed_visualization_ids train_7H6Y_C train_4J49_A train_6PR9_A 
+      --wandb_run_dir output/train_checkpoints/wandb
+    deps:
+    - path: output/datasets/val.pt
+      hash: md5
+      md5: 86a55f5b534d74b75e4b4e92d4b1b2a6
+      size: 521479505
+    - path: output/mmseqs/all_seqs_clust.tsv
+      hash: md5
+      md5: d3e122bc224fdd80427217d4c2a6309b
+      size: 671166
+    - path: output/predictions/val.pkl
+      hash: md5
+      md5: be4648673032de2e4a341156e3d3a466
+      size: 410625471
+    outs:
+    - path: output/evaluation/val
+      hash: md5
+      md5: 7b52951a237cca089d576d5c31b922b2.dir
+      size: 3453884
+      nfiles: 6
