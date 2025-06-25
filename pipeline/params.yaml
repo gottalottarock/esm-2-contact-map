@@ -290,9 +290,9 @@ stages:
         clusters_path: output/mmseqs/all_seqs_clust.tsv
         output_dir: output/evaluation/val
         fixed_visualization_ids:
-        - train_7H6Y_C
-        - train_4J49_A
-        - train_6PR9_A
+        - "train_1YVY_A" 
+        - "train_7SV6_A"
+        - "train_2ZCA_B"
         wo_wandb: false
         wandb_run_dir: output/train_checkpoints/wandb
 data_dir: ../data
