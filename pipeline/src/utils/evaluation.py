@@ -104,10 +104,11 @@ def compute_metrics_dataframe(
 
         # Compute metrics
         metric = scorer.compute_all_metrics(
-            contact_probs=contact_logits.unsqueeze(0),
+            contact_logits=contact_logits.unsqueeze(0),
             contact_maps=contact_map,
             seq_lengths=torch.tensor([item["seq_length"]], dtype=torch.long),
             base_mask=pred_item["mask_2d"].unsqueeze(0),
+            add_other_metrics=True,
         )
 
         # Add ID to metrics
@@ -498,7 +499,7 @@ def create_metrics_lineplots(
     return fig
 
 
-def create_metrics_boxplots(metrics_df: pd.DataFrame, bins=None, labels=None, split_column=None, plt_type='boxplot') -> plt.Figure:
+def create_metrics_boxplots(metrics_df: pd.DataFrame, bins=None, labels=None, split_column=None, plt_type='boxplot', plot_additional_metrics=False) -> plt.Figure:
     """
     Create boxplot visualization of metrics by cluster size bins.
     Creates 4 columns x 4 rows = 16 subplots for different metrics and distance ranges.
@@ -526,24 +527,25 @@ def create_metrics_boxplots(metrics_df: pd.DataFrame, bins=None, labels=None, sp
 
     # Define the metrics to plot (4 columns)
     metric_columns = ["roc_auc", "precision@L/5", "precision@L/2", "precision@L/1"]
+    additional_metrics = ['precision', 'recall', 'f1']
+    metric_columns = additional_metrics if plot_additional_metrics else metric_columns
 
-    # Define distance ranges (3 rows)
+    # Define distance ranges (4 rows)
     distance_ranges = ["short", "medium", "long", "full"]
 
     # Create subplots
-    fig, axes = plt.subplots(4, 4, figsize=(16, 12), dpi=600)
+    fig, axes = plt.subplots(len(distance_ranges), len(metric_columns), figsize=(16, 12), dpi=600)
     fig.suptitle(f"Metrics by {split_column}", fontsize=16)
 
     for row, distance_range in enumerate(distance_ranges):
         for col, base_metric in enumerate(metric_columns):
             ax = axes[row, col]
-
-            # Construct full metric name
-            if base_metric == "roc_auc":
-                metric_name = f"roc_auc_{distance_range}"
+            if '@' in base_metric:
+                base_metric, L_fraction = base_metric.split('@')
+                metric_name = f"precision_{distance_range}@{L_fraction}"
             else:
-                metric_name = f"precision_{distance_range}@{base_metric.split('@')[1]}"
-
+                metric_name = f"{base_metric}_{distance_range}"
+            
             # Create boxplot
             if metric_name in metrics_binned.columns:
                 if plt_type == 'boxplot':
@@ -561,7 +563,7 @@ def create_metrics_boxplots(metrics_df: pd.DataFrame, bins=None, labels=None, sp
                         ax=ax,
                     )
                 ax.set_ylim(-0.1, 1.1)
-                ax.set_title(f"{distance_range.capitalize()} - {base_metric}")
+                ax.set_title(f"{distance_range.capitalize()} - {metric_name}")
                 ax.set_xlabel(split_column)
                 ax.set_ylabel(metric_name)
 
@@ -629,7 +631,7 @@ def run_full_evaluation(
 
     print("Creating boxplots...")
     boxplot_figure = create_metrics_boxplots(metrics_with_clusters)
-
+    boxplot_figure_additional_metrics = create_metrics_boxplots(metrics_with_clusters, plot_additional_metrics=True)
     return {
         "metrics_df": metrics_df,
         "metrics_with_clusters": metrics_with_clusters,
@@ -638,6 +640,7 @@ def run_full_evaluation(
         "contact_figure": contact_figure,
         "lineplot_figure": lineplot_figure,
         "boxplot_figure": boxplot_figure,
+        "boxplot_figure_additional_metrics": boxplot_figure_additional_metrics,
         "dataset": dataset,
         "prediction_dataset": prediction_dataset,
         "clusters": clusters,

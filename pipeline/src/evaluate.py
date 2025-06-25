@@ -128,6 +128,10 @@ def main(cfg: EvaluateConfig):
     results["boxplot_figure"].savefig(boxplot_path, dpi=600, bbox_inches="tight")
     logger.info(f"Saved box plots to {boxplot_path}")
 
+    boxplot_path_additional_metrics = output_dir / "metrics_boxplots_additional.png"
+    results["boxplot_figure_additional_metrics"].savefig(boxplot_path_additional_metrics, dpi=600, bbox_inches="tight")
+    logger.info(f"Saved box plots to {boxplot_path_additional_metrics}")
+
     # Initialize WandB and log results
     if not cfg.wo_wandb:
 
@@ -151,6 +155,7 @@ def main(cfg: EvaluateConfig):
                 "val-contact_visualizations": wandb.Image(str(contact_plot_path)),
                 "val-metrics_lineplots": wandb.Image(str(lineplot_path)),
                 "val-metrics_boxplots": wandb.Image(str(boxplot_path)),
+                "val-metrics_boxplots_additional": wandb.Image(str(boxplot_path_additional_metrics)),
             }
         )
 
