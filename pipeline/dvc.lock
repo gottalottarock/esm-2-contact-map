@@ -192,18 +192,16 @@ stages:
       --model._target_ esm2_lora_contact --model.name 'base esm2 lora' 
       --model.backbone facebook/esm2_t33_650M_UR50D --model.lora_rank 8 
       --model.lora_alpha 16 --model.lora_dropout 0.1 --model.target_modules 
-      query key value --model.contact_head_dim 4 --model.learning_rate 0.005 
-      --model.weight_decay 0.0001 --model.wo_lora --datamodule._target_ 
-      protein_datamodule --datamodule.name 'all seqs' --datamodule.batch_size 4 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
+      query key value --model.contact_head_dim 4 --model.learning_rate 0.0005 
+      --model.weight_decay 0.0001 --datamodule._target_ protein_datamodule 
+      --datamodule.name '1 seq from pdb except cluster' --datamodule.batch_size 
+      4 --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
       --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
       --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
       output/datasets/train.pt --datamodule.val_dataset_path 
       output/datasets/val.pt --datamodule.test_dataset_path 
       output/datasets/test.pt --datamodule.sampler.cluster_path 
       output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 1.0 
-      --datamodule.sampler.train_intersect_val_clusters 
-      --datamodule.sampler.train_intersect_test_clusters 
       --datamodule.sampler.val_n_pdb 1.0 --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1
@@ -219,8 +217,8 @@ stages:
     outs:
     - path: output/train_checkpoints
       hash: md5
-      md5: 7c4018c28ee19f62d560d2cd9ef3c43b.dir
-      size: 2618726013
+      md5: 46616f8684dbf14eb2eb239c5110878b.dir
+      size: 2637929356
       nfiles: 15
   predict@val:
     cmd: python src/predict.py --model esm2_lora_contact --datamodule 
@@ -234,18 +232,16 @@ stages:
       --model._target_ esm2_lora_contact --model.name 'base esm2 lora' 
       --model.backbone facebook/esm2_t33_650M_UR50D --model.lora_rank 8 
       --model.lora_alpha 16 --model.lora_dropout 0.1 --model.target_modules 
-      query key value --model.contact_head_dim 4 --model.learning_rate 5e-05 
-      --model.weight_decay 0.0001 --model.wo_lora --datamodule._target_ 
-      protein_datamodule --datamodule.name 'all seqs' --datamodule.batch_size 4 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
+      query key value --model.contact_head_dim 4 --model.learning_rate 0.0005 
+      --model.weight_decay 0.0001 --datamodule._target_ protein_datamodule 
+      --datamodule.name '1 seq from pdb except cluster' --datamodule.batch_size 
+      4 --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
       --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
       --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
       output/datasets/train.pt --datamodule.val_dataset_path 
       output/datasets/val.pt --datamodule.test_dataset_path 
       output/datasets/val.pt --datamodule.sampler.cluster_path 
       output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 1.0 
-      --datamodule.sampler.train_intersect_val_clusters 
-      --datamodule.sampler.train_intersect_test_clusters 
       --datamodule.sampler.val_n_pdb 1.0 --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1 --checkpoint_name best 
@@ -258,8 +254,8 @@ stages:
     outs:
     - path: output/predictions/val.pkl
       hash: md5
-      md5: 19e3c385e66057b0fe1cc327b8d9554b
-      size: 562605350
+      md5: d2311fa88a605644194d3f0b026f152c
+      size: 562605334
   predict@test:
     cmd: python src/predict.py --model esm2_lora_contact --datamodule 
       protein_datamodule --trainer.output_dir output/train_checkpoints 
@@ -272,18 +268,16 @@ stages:
       --model._target_ esm2_lora_contact --model.name 'base esm2 lora' 
       --model.backbone facebook/esm2_t33_650M_UR50D --model.lora_rank 8 
       --model.lora_alpha 16 --model.lora_dropout 0.1 --model.target_modules 
-      query key value --model.contact_head_dim 4 --model.learning_rate 5e-05 
-      --model.weight_decay 0.0001 --model.wo_lora --datamodule._target_ 
-      protein_datamodule --datamodule.name 'all seqs' --datamodule.batch_size 4 
-      --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
+      query key value --model.contact_head_dim 4 --model.learning_rate 0.0005 
+      --model.weight_decay 0.0001 --datamodule._target_ protein_datamodule 
+      --datamodule.name '1 seq from pdb except cluster' --datamodule.batch_size 
+      4 --datamodule.num_workers 4 --datamodule.max_seq_length 1024 
       --datamodule.tokenizer_name facebook/esm2_t33_650M_UR50D 
       --datamodule.contact_threshold 8.0 --datamodule.train_dataset_path 
       output/datasets/train.pt --datamodule.val_dataset_path 
       output/datasets/val.pt --datamodule.test_dataset_path 
       output/datasets/test.pt --datamodule.sampler.cluster_path 
       output/mmseqs/all_seqs_clust.tsv --datamodule.sampler.train_n_pdb 1.0 
-      --datamodule.sampler.train_intersect_val_clusters 
-      --datamodule.sampler.train_intersect_test_clusters 
       --datamodule.sampler.val_n_pdb 1.0 --datamodule.sampler.test_n_pdb 1.0 
       --datamodule.sampler.train_max_chains_per_pdb 1 
       --datamodule.sampler.val_max_chains_per_pdb 1 --checkpoint_name best 
@@ -296,8 +290,8 @@ stages:
     outs:
     - path: output/predictions/test.pkl
       hash: md5
-      md5: c56912a6b1192d8e0e0afc08b2d6043a
-      size: 760425550
+      md5: e4df093837a91b1749e937a64962a4f5
+      size: 760425542
   evaluate@val:
     cmd: python src/evaluate.py --dataset_path output/datasets/val.pt 
       --predictions_path output/predictions/val.pkl --clusters_path 
@@ -315,11 +309,11 @@ stages:
       size: 671166
     - path: output/predictions/val.pkl
       hash: md5
-      md5: 19e3c385e66057b0fe1cc327b8d9554b
-      size: 562605350
+      md5: d2311fa88a605644194d3f0b026f152c
+      size: 562605334
     outs:
     - path: output/evaluation/val
       hash: md5
-      md5: f41cbca4ad58cae4eef054060625ae08.dir
-      size: 3367807
+      md5: 81914d2977a0a5c0c6f5cab8af03fc82.dir
+      size: 3611535
       nfiles: 6
