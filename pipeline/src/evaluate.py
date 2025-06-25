@@ -49,6 +49,7 @@ def get_wandb_run_id(wandb_run_dir: Optional[str], output_dir: str) -> Optional[
         latest_run_path = (
             Path(output_dir).parent / "train_checkpoints" / "wandb" / "latest-run"
         )
+        all_runs = []
 
     if latest_run_path.exists():
         if latest_run_path.is_symlink():
