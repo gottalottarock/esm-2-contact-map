@@ -83,7 +83,7 @@ class ESM2LoRAContactConvTemplate(ESM2LoRAContact):
 
     def freeze_lora(self):
         for name, param in self.esm_model.named_parameters():
-            if "lora" not in name:
+            if "lora" in name:
                 param.requires_grad = False
 
     def _forward_pass(self, batch):

@@ -1,6 +1,6 @@
 defaults:
-  - model: esm2_lora_contact_650m
-  - datamodule: base_allseq
+  - model: esm2_lora_template_contactconv_650m
+  - datamodule: paired
   - trainer: trainer
   - stages/parse_pdb: parse_pdb
   - stages/mmseqs2: mmseqs2
