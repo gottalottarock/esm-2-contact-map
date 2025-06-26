@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class PairedProteinDataModuleConfig(ProteinDataModuleConfig):
     similarity_file_path: str = ""
     min_similarity_threshold: float = 0.3
-    max_similarity_threshold: int = 0.95
+    max_similarity_threshold: float = 0.95
 
 
 @register_datamodule("paired_protein_datamodule", PairedProteinDataModuleConfig)
@@ -67,15 +67,15 @@ class PairedProteinDataModule(ProteinDataModule):
         self,
         similarity_df: pd.DataFrame,
         min_similarity_threshold: float,
-    ) -> pd.DataFrame:
-        similarity_df = similarity_df[
+    ) -> dict[str, dict[str, Any]]:
+        similarity_df = similarity_df.loc[
             similarity_df["query_pdb_id"] != similarity_df["target_pdb_id"]
         ]
-        similarity_df = similarity_df[similarity_df["target_split"] != "test"]
-        similarity_df = similarity_df[
+        similarity_df = similarity_df.loc[similarity_df["target_split"] != "test"]
+        similarity_df = similarity_df.loc[
             similarity_df["identity"] >= min_similarity_threshold
         ]
-        similarity_df = similarity_df[
+        similarity_df = similarity_df.loc[
             similarity_df["identity"] <= self.config.max_similarity_threshold
         ]
         similarity_df = (
@@ -90,10 +90,10 @@ class PairedProteinDataModule(ProteinDataModule):
             f"Num test in queries: {len(similarity_df[similarity_df['query_split'] == 'test'])}"
         )
         logger.info(f"Loaded {len(similarity_df)} similarity pairs: ")
-        similarity_df = similarity_df[["target_id", "identity"]]
+        similarity_df = similarity_df.loc[:, ["target_id", "identity"]]
 
         logger.info(f"{similarity_df.sample(10)}")
-        pairs = similarity_df[["identity", "target_id"]].to_dict("index")
+        pairs = similarity_df.loc[:, ["identity", "target_id"]].to_dict("index")
         return pairs
 
     def setup(self, stage: Optional[str] = None):
@@ -154,7 +154,6 @@ class PairedProteinDataModule(ProteinDataModule):
             # Since batch_size=1, we only have one item
             assert len(batch) == 1, f"Expected batch_size=1, got {len(batch)}"
             item = batch[0]
-            print(batch)
 
             # Extract sequences
             primary_sequence = item["primary_sequence"]
@@ -173,7 +172,7 @@ class PairedProteinDataModule(ProteinDataModule):
                         similar_sequence,
                     ]
                 ) if similar_sequence is not None else None,
-                "similarity_score": similarity_score,
+                "metadata": [item['primary_sequence']['metadata'] | {"similarity_score": similarity_score}]
             }
 
             return result

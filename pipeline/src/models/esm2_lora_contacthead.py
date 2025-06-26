@@ -227,11 +227,10 @@ class ESM2LoRAContact(L.LightningModule):
         loss = self.loss_fn(contact_logits[final_mask], contact_map[final_mask])
         return loss
 
-    def training_step(self, batch, batch_idx):
-        """Training step."""
+    def _forward_pass(self, batch):
+        """Common forward pass logic for train/val/predict steps."""
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
-        contact_map = batch["contact_maps"]
         seq_lengths = batch["seq_lengths"]
 
         max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
@@ -239,13 +238,20 @@ class ESM2LoRAContact(L.LightningModule):
 
         # Forward pass
         contact_logits = self(input_ids, attention_mask, mask_2d)
+        
+        return contact_logits, mask_2d
+
+    def training_step(self, batch, batch_idx):
+        """Training step."""
+        contact_logits, mask_2d = self._forward_pass(batch)
+        contact_map = batch["contact_maps"]
 
         # Compute loss only on valid positions
         loss = self.compute_loss(contact_logits, contact_map, mask_2d)
         self.log(
             "train_loss",
             loss,
-            batch_size=input_ids.shape[0],
+            batch_size=batch["input_ids"].shape[0],
             on_step=True,
             on_epoch=True,
             prog_bar=True,
@@ -255,23 +261,15 @@ class ESM2LoRAContact(L.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         """Validation step."""
-        input_ids = batch["input_ids"]
-        attention_mask = batch["attention_mask"]
+        contact_logits, mask_2d = self._forward_pass(batch)
         contact_map = batch["contact_maps"]
-        seq_lengths = batch["seq_lengths"]
-
-        max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask_2d = self.create_mask(seq_lengths, max_length)
-
-        # Forward pass
-        contact_logits = self(input_ids, attention_mask, mask_2d)
 
         # Compute loss only on valid positions
         loss = self.compute_loss(contact_logits, contact_map, mask_2d).item()
 
         # Compute comprehensive metrics
         metrics = self.contact_metrics.compute_all_metrics(
-            contact_logits, contact_map, seq_lengths, mask_2d, average=False
+            contact_logits, contact_map, batch["seq_lengths"], mask_2d, average=False
         )
 
         self.validation_step_outputs.append({"loss": loss, "metrics": metrics})
@@ -298,15 +296,7 @@ class ESM2LoRAContact(L.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         """Prediction step for inference."""
-        input_ids = batch["input_ids"]
-        attention_mask = batch["attention_mask"]
-        seq_lengths = batch["seq_lengths"]
-
-        max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask_2d = self.create_mask(seq_lengths, max_length)
-
-        # Forward pass
-        contact_logits = self(input_ids, attention_mask, mask_2d)
+        contact_logits, mask_2d = self._forward_pass(batch)
 
         return {
             "contact_logits": contact_logits,
