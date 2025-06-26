@@ -302,8 +302,8 @@ stages:
     cmd: python src/evaluate.py --dataset_path output/datasets/val.pt 
       --predictions_path output/predictions/val.pkl --clusters_path 
       output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/val 
-      --fixed_visualization_ids train_1YVY_A train_7SV6_A train_2ZCA_B 
-      --wandb_run_dir output/train_checkpoints/wandb
+      --fixed_visualization_ids train_1YVY_A train_7SV6_A train_2ZCA_B --prefix 
+      val --wandb_run_dir output/train_checkpoints/wandb
     deps:
     - path: output/datasets/val.pt
       hash: md5
@@ -322,4 +322,28 @@ stages:
       hash: md5
       md5: 70cc8a0fc9b38b2a53f46a6639cb3405.dir
       size: 6068450
+      nfiles: 7
+  evaluate@test:
+    cmd: python src/evaluate.py --dataset_path output/datasets/test.pt 
+      --predictions_path output/predictions/test.pkl --clusters_path 
+      output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/test 
+      --prefix test --wandb_run_dir output/train_checkpoints/wandb
+    deps:
+    - path: output/datasets/test.pt
+      hash: md5
+      md5: 92625625842448c8cc76634d0b507931
+      size: 677360169
+    - path: output/mmseqs/all_seqs_clust.tsv
+      hash: md5
+      md5: d3e122bc224fdd80427217d4c2a6309b
+      size: 671166
+    - path: output/predictions/test.pkl
+      hash: md5
+      md5: 5bb5b4c6084361e718ad612c31d86c91
+      size: 760425540
+    outs:
+    - path: output/evaluation/test
+      hash: md5
+      md5: 3b454d8dc5ab906375ace468eb5435e1.dir
+      size: 6568912
       nfiles: 7
