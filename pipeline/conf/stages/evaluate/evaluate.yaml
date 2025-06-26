@@ -14,9 +14,9 @@ defaults:
     
     # Fixed IDs for visualization (optional)
     fixed_visualization_ids:
-      - "train_7H6Y_C" 
-      - "train_4J49_A"
-      - "train_6PR9_A"
+      - "train_1YVY_A" 
+      - "train_7SV6_A"
+      - "train_2ZCA_B"
     prefix: val
     # WandB settings
     wo_wandb: false
