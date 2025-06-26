@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
+
 def compute_distance_matrix(coords_ca: np.ndarray) -> np.ndarray:
     """
     Compute distance matrix from CA coordinates.
@@ -65,6 +66,8 @@ class ProteinSequenceDataset(Dataset):
         assert (
             len(sequences) == len(b_factors) == len(distance_maps) == len(metadata)
         ), "All data lists must have the same length"
+
+        self.id_ind_map = {metadata["id"]: i for i, metadata in enumerate(metadata)}
 
     @classmethod
     def from_df(
@@ -219,6 +222,12 @@ class ProteinSequenceDataset(Dataset):
     def __len__(self) -> int:
         return len(self.sequences)
 
+    def get_by_id(self, id: str) -> Dict[str, Any]:
+        """
+        Get item by ID.
+        """
+        return self[self.id_ind_map[id]]
+
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         """
         Get item by index.
@@ -259,3 +268,9 @@ class ProteinSequenceDataset(Dataset):
             item["distance_map"] = torch.tensor(distance_map, dtype=torch.float32)
 
         return item
+
+    def metadata_to_df(self) -> pd.DataFrame:
+        """
+        Convert metadata to DataFrame.
+        """
+        return pd.DataFrame.from_records(self.metadata)
