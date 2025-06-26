@@ -19,5 +19,6 @@ target_modules: ["query", "key", "value"]  # Target attention layers
 contact_head_dim: 4  # todo: Larger head for bigger model
 
 # Training parameters
-learning_rate: 5e-5  # Lower learning rate for larger model
+learning_rate: 5e-4  # Lower learning rate for larger model
 weight_decay: 1e-4 
+# backbone_init_from: null # default is None

@@ -28,12 +28,12 @@ class ContactSelfAttentionLayer(nn.Module):
         self.norm = nn.LayerNorm(dim)
 
     def forward(self, x_tpl: torch.Tensor, contact_mask: torch.Tensor):
-        # todo: pad contact mask to the same length as x_tpl
         # contact_mask: (1, L, L) → bool mask (True = block)
         attn_mask = contact_mask[0] < 0.5
         attn_mask = nn.functional.pad(
             attn_mask, (1, 1, 1, 1), mode="constant", value=True
         )  # pad CLS and EOS tokens not to attend to them
+        attn_mask.fill_diagonal_(False) # to make that at least one non null value is present in the diagonal
         attn_out, _ = self.attn(x_tpl, x_tpl, x_tpl, attn_mask=attn_mask)
         return self.norm(x_tpl + attn_out)
 
@@ -82,8 +82,8 @@ class ESM2LoRAContactConvTemplate(ESM2LoRAContact):
         return outputs.last_hidden_state
 
     def freeze_lora(self):
-        for param in self.esm_model.parameters():
-            if "lora" in param.name:
+        for name, param in self.esm_model.named_parameters():
+            if "lora" not in name:
                 param.requires_grad = False
 
     def _forward_pass(self, batch):
@@ -93,8 +93,11 @@ class ESM2LoRAContactConvTemplate(ESM2LoRAContact):
             "contact_maps"
         ]  # ugly fix not to change the original module
         batch["seq_lengths"] = batch["primary_sequence"]["seq_lengths"]
+        batch['input_ids'] = primary_sequence["input_ids"]
         primary_mask_2d = self.create_mask(
-            batch["seq_lengths"], batch["input_ids"].shape[-1]
+            batch["seq_lengths"],
+            batch["primary_sequence"]["input_ids"].shape[-1]
+            - 2,  # -2 for CLS and EOS tokens
         )
         if template_sequence is not None:
             return self(
@@ -103,13 +106,15 @@ class ESM2LoRAContactConvTemplate(ESM2LoRAContact):
                 mask_2d=primary_mask_2d,
                 template_ids=template_sequence["input_ids"],
                 template_attention_mask=template_sequence["attention_mask"],
-                template_contact_maps=batch["contact_maps"],
+                template_contact_maps=template_sequence["contact_maps"],
+                mode="template"
             )
         else:
             return self(
                 input_ids=primary_sequence["input_ids"],
                 attention_mask=primary_sequence["attention_mask"],
                 mask_2d=primary_mask_2d,
+                mode="self"
             )
 
     def forward(
@@ -123,20 +128,17 @@ class ESM2LoRAContactConvTemplate(ESM2LoRAContact):
         mode: str = "template",
     ):
         assert mode in ["template", "self"]
-        hiddent_states = self._forward_esm(input_ids, attention_mask)
+        hidden_states = self._forward_esm(input_ids, attention_mask)  # (B, L, D)
         if mode == "template":
-            template_hiddent_states = self._forward_esm(
+            template_hidden_states = self._forward_esm(
                 template_ids, template_attention_mask
-            )
-            template_hiddent_states = self.contact_self_attention_layer(
-                template_hiddent_states, template_contact_maps
-            )
-            template_hiddent_states = self.contact_cross_attention_layer(
-                hiddent_states, template_hiddent_states
-            )
-            hiddent_states = template_hiddent_states
-        elif mode == "self":
-            hiddent_states = self.contact_self_attention_layer(hiddent_states, mask_2d)
+            )  # (B, Lt, D)
+            template_hidden_states = self.contact_self_attention_layer(
+                template_hidden_states, template_contact_maps
+            )  # (B, Lt, D)
+            hidden_states = self.contact_cross_attention_layer(
+                hidden_states, template_hidden_states
+            )  # (B, L, D)
 
-        contact_logits = self.contact_head(hiddent_states, mask_2d)
-        return contact_logits
+        contact_logits = self.contact_head(hidden_states, mask_2d)
+        return contact_logits, mask_2d
