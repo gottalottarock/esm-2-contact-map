@@ -216,9 +216,9 @@ stages:
     outs:
     - path: output/train_checkpoints
       hash: md5
-      md5: 8321f8631ce763da8596d63f76300291.dir
-      size: 2604663751
-      nfiles: 4
+      md5: acf4f4ea5281c62ea63c694c7f737692.dir
+      size: 2604663769
+      nfiles: 5
   predict@val:
     cmd: python src/predict.py --model esm2_unsupervised_baseline --datamodule 
       protein_datamodule --trainer.output_dir output/train_checkpoints 
@@ -293,8 +293,8 @@ stages:
     cmd: python src/evaluate.py --dataset_path output/datasets/val.pt 
       --predictions_path output/predictions/val.pkl --clusters_path 
       output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/val 
-      --fixed_visualization_ids train_7H6Y_C train_4J49_A train_6PR9_A 
-      --wandb_run_dir output/train_checkpoints/wandb
+      --fixed_visualization_ids train_1YVY_A train_7SV6_A train_2ZCA_B --prefix 
+      val --wandb_run_dir output/train_checkpoints/wandb
     deps:
     - path: output/datasets/val.pt
       hash: md5
@@ -311,6 +311,30 @@ stages:
     outs:
     - path: output/evaluation/val
       hash: md5
-      md5: 7b52951a237cca089d576d5c31b922b2.dir
-      size: 3453884
-      nfiles: 6
+      md5: ebe8a0296cde232bb6fbbd933a6b9a42.dir
+      size: 5793912
+      nfiles: 7
+  evaluate@test:
+    cmd: python src/evaluate.py --dataset_path output/datasets/test.pt 
+      --predictions_path output/predictions/test.pkl --clusters_path 
+      output/mmseqs/all_seqs_clust.tsv --output_dir output/evaluation/test 
+      --prefix test --wandb_run_dir output/train_checkpoints/wandb
+    deps:
+    - path: output/datasets/test.pt
+      hash: md5
+      md5: 92625625842448c8cc76634d0b507931
+      size: 677360169
+    - path: output/mmseqs/all_seqs_clust.tsv
+      hash: md5
+      md5: d3e122bc224fdd80427217d4c2a6309b
+      size: 671166
+    - path: output/predictions/test.pkl
+      hash: md5
+      md5: c536ca99d568abb18611a4d3fc835bde
+      size: 559268155
+    outs:
+    - path: output/evaluation/test
+      hash: md5
+      md5: f87867d2c345f4716346ddf70ad3db9c.dir
+      size: 6470695
+      nfiles: 7
