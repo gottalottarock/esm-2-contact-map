@@ -29,6 +29,7 @@ class EvaluateConfig:
 
     # Output directory
     output_dir: str
+    prefix: str
 
     # Fixed IDs for visualization (optional)
     fixed_visualization_ids: Optional[List[str]] = None
@@ -144,13 +145,13 @@ def main(cfg: EvaluateConfig):
         # Log metrics
         wandb.log(
             {
-                f"val-avg_metrics_simple/{k}": v
+                f"{cfg.prefix}-avg_metrics_simple/{k}": v
                 for k, v in results["avg_metrics_simple"].items()
             }
         )
         wandb.log(
             {
-                f"val-avg_metrics_pdb_first/{k}": v
+                f"{cfg.prefix}-avg_metrics_pdb_first/{k}": v
                 for k, v in results["avg_metrics_pdb_first"].items()
             }
         )
@@ -158,10 +159,10 @@ def main(cfg: EvaluateConfig):
         # Log images
         wandb.log(
             {
-                "val-contact_visualizations": wandb.Image(str(contact_plot_path)),
-                "val-metrics_lineplots": wandb.Image(str(lineplot_path)),
-                "val-metrics_boxplots": wandb.Image(str(boxplot_path)),
-                "val-metrics_boxplots_additional": wandb.Image(str(boxplot_path_additional_metrics)),
+                f"{cfg.prefix}-contact_visualizations": wandb.Image(str(contact_plot_path)),
+                f"{cfg.prefix}-metrics_lineplots": wandb.Image(str(lineplot_path)),
+                f"{cfg.prefix}-metrics_boxplots": wandb.Image(str(boxplot_path)),
+                f"{cfg.prefix}-metrics_boxplots_additional": wandb.Image(str(boxplot_path_additional_metrics)),
             }
         )
 

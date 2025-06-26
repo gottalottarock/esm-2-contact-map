@@ -621,8 +621,7 @@ def run_full_evaluation(
 
     print("Creating visualizations...")
     contact_figure = create_contact_visualizations(
-        dataset, prediction_dataset, metrics_df, fixed_ids=fixed_visualization_ids,
-        mode='colored'
+        dataset, prediction_dataset, metrics_df, fixed_ids=fixed_visualization_ids, mode='colored'
     )
 
     print("Creating line plots...")
