@@ -10,11 +10,11 @@ model:
   - key
   - value
   contact_head_dim: 4
-  learning_rate: 0.0005
+  learning_rate: 5.0e-05
   weight_decay: 0.0001
 datamodule:
   _target_: protein_datamodule
-  name: 1 seq from pdb except cluster
+  name: all seqs
   batch_size: 4
   num_workers: 4
   max_seq_length: 1024
@@ -27,8 +27,8 @@ datamodule:
   sampler:
     cluster_path: output/mmseqs/all_seqs_clust.tsv
     train_n_pdb: 1.0
-    train_intersect_val_clusters: false
-    train_intersect_test_clusters: false
+    train_intersect_val_clusters: true
+    train_intersect_test_clusters: true
     val_n_pdb: 1.0
     test_n_pdb: 1.0
     train_max_chains_per_pdb: 1
@@ -143,11 +143,11 @@ stages:
         - key
         - value
         contact_head_dim: 4
-        learning_rate: 0.0005
+        learning_rate: 5.0e-05
         weight_decay: 0.0001
       datamodule:
         _target_: protein_datamodule
-        name: 1 seq from pdb except cluster
+        name: all seqs
         batch_size: 4
         num_workers: 4
         max_seq_length: 1024
@@ -160,8 +160,8 @@ stages:
         sampler:
           cluster_path: output/mmseqs/all_seqs_clust.tsv
           train_n_pdb: 1.0
-          train_intersect_val_clusters: false
-          train_intersect_test_clusters: false
+          train_intersect_val_clusters: true
+          train_intersect_test_clusters: true
           val_n_pdb: 1.0
           test_n_pdb: 1.0
           train_max_chains_per_pdb: 1
@@ -197,11 +197,11 @@ stages:
           - key
           - value
           contact_head_dim: 4
-          learning_rate: 0.0005
+          learning_rate: 5.0e-05
           weight_decay: 0.0001
         datamodule:
           _target_: protein_datamodule
-          name: 1 seq from pdb except cluster
+          name: all seqs
           batch_size: 4
           num_workers: 4
           max_seq_length: 1024
@@ -214,8 +214,8 @@ stages:
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
             train_n_pdb: 1.0
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
             val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
@@ -252,11 +252,11 @@ stages:
           - key
           - value
           contact_head_dim: 4
-          learning_rate: 0.0005
+          learning_rate: 5.0e-05
           weight_decay: 0.0001
         datamodule:
           _target_: protein_datamodule
-          name: 1 seq from pdb except cluster
+          name: all seqs
           batch_size: 4
           num_workers: 4
           max_seq_length: 1024
@@ -269,8 +269,8 @@ stages:
           sampler:
             cluster_path: output/mmseqs/all_seqs_clust.tsv
             train_n_pdb: 1.0
-            train_intersect_val_clusters: false
-            train_intersect_test_clusters: false
+            train_intersect_val_clusters: true
+            train_intersect_test_clusters: true
             val_n_pdb: 1.0
             test_n_pdb: 1.0
             train_max_chains_per_pdb: 1
@@ -286,9 +286,20 @@ stages:
         clusters_path: output/mmseqs/all_seqs_clust.tsv
         output_dir: output/evaluation/val
         fixed_visualization_ids:
-        - train_7H6Y_C
-        - train_4J49_A
-        - train_6PR9_A
+        - train_1YVY_A
+        - train_7SV6_A
+        - train_2ZCA_B
+        prefix: val
+        wo_wandb: false
+        wandb_run_dir: output/train_checkpoints/wandb
+    test:
+      script: src/evaluate.py
+      params:
+        dataset_path: output/datasets/test.pt
+        predictions_path: output/predictions/test.pkl
+        clusters_path: output/mmseqs/all_seqs_clust.tsv
+        output_dir: output/evaluation/test
+        prefix: test
         wo_wandb: false
         wandb_run_dir: output/train_checkpoints/wandb
 data_dir: ../data
