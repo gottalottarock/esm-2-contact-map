@@ -153,9 +153,8 @@ dvc queue status
 7. **evaluate**: Evaluate model performance
 
 ```mermaid
+
 flowchart TD
-	node1["../data/ml_interview_task_data.zip.dvc"]
-	node2["../data/selected_validation_clusters.json.dvc"]
 	node3["../data/selected_validation_pdbs.json.dvc"]
 	node4["../data/test.dvc"]
 	node5["../data/train.dvc"]
@@ -181,10 +180,12 @@ flowchart TD
 	node11-->node8
 	node13-->node6
 	node14-->node6
-	node14-->node12
-	node14-->node13
+	node15-->node12
+    node14-->node12
+	node15-->node13
+    node14-->node13
 	node14-->node15
-	node16["../data/checkpoints.dvc"]
+
 ```
 
 
