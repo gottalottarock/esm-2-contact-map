@@ -144,7 +144,6 @@ dvc queue status
 ```
 
 ### Pipeline Stages
-#todo add dag image
 1. **parse_pdb**: Extract sequences and structural information from PDB files
 2. **filter_sequences**: Filter sequences by length and quality
 3. **mmseqs2**: Cluster sequences and compute similarity between them
@@ -152,6 +151,42 @@ dvc queue status
 5. **train**: Train the model
 6. **predict**: Generate predictions
 7. **evaluate**: Evaluate model performance
+
+```mermaid
+flowchart TD
+	node1["../data/ml_interview_task_data.zip.dvc"]
+	node2["../data/selected_validation_clusters.json.dvc"]
+	node3["../data/selected_validation_pdbs.json.dvc"]
+	node4["../data/test.dvc"]
+	node5["../data/train.dvc"]
+	node6["evaluate@val"]
+	node7["filter_sequences@test"]
+	node8["filter_sequences@train"]
+	node9["mmseqs2"]
+	node10["parse_pdb@test"]
+	node11["parse_pdb@train"]
+	node12["predict@test"]
+	node13["predict@val"]
+	node14["prepare_dataset"]
+	node15["train"]
+	node3-->node14
+	node4-->node10
+	node5-->node11
+	node7-->node9
+	node7-->node14
+	node8-->node9
+	node8-->node14
+	node9-->node6
+	node10-->node7
+	node11-->node8
+	node13-->node6
+	node14-->node6
+	node14-->node12
+	node14-->node13
+	node14-->node15
+	node16["../data/checkpoints.dvc"]
+```
+
 
 
 ## Configuration
