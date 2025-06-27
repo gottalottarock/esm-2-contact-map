@@ -6,10 +6,15 @@ This project implements a protein contact map prediction system based on the pre
 
 Main models results:
 
-unsupervised:https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/ykthsvvz
-lora: todo: paste link
-lora_conv: todo: paste link
- #todo paste metrics
+|                                                                                               |           |           |           |           |           |           |           |
+| --------------------------------------------------------------------------------------------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
+| Name                                                                                          | P\_l\@L/5 | P\_l\@L/1 | P\_f\@L/5 | P\_f\@L/1 | P\_f      | Recall\_f | f1\_f     |
+| [ESN2-Template: all seq](https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/7bn0eyvu)  | **0.93**  | **0.741** | **0.966** | **0.873** | **0.802** | **0.685** | **0.729** |
+| [ESN2-LoRA Conv: all seq](https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/osev9png) | 0.929     | 0.738     | 0.965     | 0.871     | 0.808     | 0.673     | 0.723     |
+| [ESN2-LoRA base: all seq](https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/jqojj03g) | 0.901     | 0.683     | 0.948     | 0.826     | 0.78      | 0.595     | 0.664     |
+| [ESN2-LoRA base: no homo](https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/w6as1xvg) | 0.855     | 0.588     | 0.92      | 0.75      | 0.699     | 0.503     | 0.574     |
+| [ESN2-Rao: no homo](https://wandb.ai/stepan-v-kuznetsov/deep-origin-task/runs/ykthsvvz)       | 0.714     | 0.431     | 0.83      | 0.579     | 0.673     | 0.248     | 0.35      |
+
 
 ## Project Architecture
 
