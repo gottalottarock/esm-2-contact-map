@@ -75,11 +75,13 @@ class Sampler:
     def sample_train(
         self, train_dataset: ProteinSequenceDataset, val_dataset: ProteinSequenceDataset
     ):
-        df_train = pd.DataFrame.from_records(train_dataset.metadata)
+        df_train = train_dataset.metadata_to_df()
+        print(df_train.head())
         df_train[["split", "pdb_id", "chain"]] = df_train["id"].str.split(
             "_", expand=True
         )
-        df_val = pd.DataFrame.from_records(val_dataset.metadata)
+        df_val = val_dataset.metadata_to_df()
+        print(df_val.head())
         df_val[["split", "pdb_id", "chain"]] = df_val["id"].str.split("_", expand=True)
         if not self.config.train_intersect_val_clusters:
             val_clusters = self.clusters.loc[self.clusters.seq_id.isin(df_val.id)][
@@ -129,7 +131,7 @@ class Sampler:
         return train_dataset.filter_seq_ids(selected_sequences)
 
     def sample_val(self, val_dataset: ProteinSequenceDataset):
-        df_val = pd.DataFrame.from_records(val_dataset.metadata)
+        df_val = val_dataset.metadata_to_df()
         df_val[["split", "pdb_id", "chain"]] = df_val["id"].str.split("_", expand=True)
         if self.config.val_n_pdb:
             selected_pdb_ids = self.select_num_pdbs_from_df(
@@ -151,7 +153,7 @@ class Sampler:
         return val_dataset.filter_seq_ids(selected_sequences)
 
     def sample_test(self, test_dataset: ProteinSequenceDataset):
-        df_test = pd.DataFrame.from_records(test_dataset.metadata)
+        df_test = test_dataset.metadata_to_df()
         df_test[["split", "pdb_id", "chain"]] = df_test["id"].str.split(
             "_", expand=True
         )

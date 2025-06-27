@@ -1,1 +1,2 @@
 from datamodules.datamodule import ProteinDataModule, ProteinDataModuleConfig
+from datamodules.paired_datamodule import PairedProteinDataModule, PairedProteinDataModuleConfig

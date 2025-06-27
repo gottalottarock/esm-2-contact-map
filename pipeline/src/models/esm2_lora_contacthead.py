@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 import lightning as L
@@ -10,6 +10,10 @@ from registry import BaseModelConfig, register_model
 from transformers import EsmModel
 from peft import LoraConfig, get_peft_model, TaskType
 from torchvision.ops.focal_loss import sigmoid_focal_loss
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class ContactHead(nn.Module):
@@ -88,7 +92,7 @@ class ESM2LoRAContactConfig(BaseModelConfig):
 
     # Model backbone selection
     backbone: str
-    loss: LossConfig
+    loss: LossConfig = field(default_factory=LossConfig)
 
     # if true, will not use LoRA
     wo_lora: bool = False
@@ -106,7 +110,7 @@ class ESM2LoRAContactConfig(BaseModelConfig):
     # Training parameters
     learning_rate: float = 2e-5
     weight_decay: float = 0.01
-    
+    backbone_init_from: Optional[str] = None
 
 
 class SigmoidFocalLoss(nn.Module):
@@ -117,7 +121,9 @@ class SigmoidFocalLoss(nn.Module):
         self.reduction = reduction
 
     def forward(self, input, target):
-        loss = sigmoid_focal_loss(input, target, gamma=self.gamma, alpha=self.alpha, reduction=self.reduction)
+        loss = sigmoid_focal_loss(
+            input, target, gamma=self.gamma, alpha=self.alpha, reduction=self.reduction
+        )
         return loss
 
 
@@ -145,9 +151,22 @@ class ESM2LoRAContact(L.LightningModule):
             target_modules=target_modules,
         )
 
+
+
         if not self.config.wo_lora:
             # Apply LoRA to the model
             self.esm_model = get_peft_model(self.esm_model, lora_config)
+
+        if self.config.backbone_init_from:
+            logger.info(f"Loading backbone from {self.config.backbone_init_from}")
+            ckpt = torch.load(self.config.backbone_init_from, weights_only=False)
+            state_dict = ckpt["state_dict"]
+            esm_sd = {
+                k.replace("esm_model.", ""): v
+                for k, v in state_dict.items()
+                if k.startswith("esm_model.")
+            }
+            self.esm_model.load_state_dict(esm_sd, strict=True)
         self.freeze_backbone()
 
         # Contact prediction head
@@ -157,7 +176,9 @@ class ESM2LoRAContact(L.LightningModule):
         if self.config.loss.loss_type == "bce":
             self.loss_fn = nn.BCEWithLogitsLoss()
         elif self.config.loss.loss_type == "focal":
-            self.loss_fn = SigmoidFocalLoss(gamma=self.config.loss.focal_gamma, alpha=self.config.loss.focal_alpha)
+            self.loss_fn = SigmoidFocalLoss(
+                gamma=self.config.loss.focal_gamma, alpha=self.config.loss.focal_alpha
+            )
         else:
             raise ValueError(f"Invalid loss type: {self.config.loss.loss_type}")
 
@@ -227,11 +248,10 @@ class ESM2LoRAContact(L.LightningModule):
         loss = self.loss_fn(contact_logits[final_mask], contact_map[final_mask])
         return loss
 
-    def training_step(self, batch, batch_idx):
-        """Training step."""
+    def _forward_pass(self, batch):
+        """Common forward pass logic for train/val/predict steps."""
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
-        contact_map = batch["contact_maps"]
         seq_lengths = batch["seq_lengths"]
 
         max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
@@ -240,12 +260,19 @@ class ESM2LoRAContact(L.LightningModule):
         # Forward pass
         contact_logits = self(input_ids, attention_mask, mask_2d)
 
+        return contact_logits, mask_2d
+
+    def training_step(self, batch, batch_idx):
+        """Training step."""
+        contact_logits, mask_2d = self._forward_pass(batch)
+        contact_map = batch["contact_maps"]
+
         # Compute loss only on valid positions
         loss = self.compute_loss(contact_logits, contact_map, mask_2d)
         self.log(
             "train_loss",
             loss,
-            batch_size=input_ids.shape[0],
+            batch_size=batch["input_ids"].shape[0],
             on_step=True,
             on_epoch=True,
             prog_bar=True,
@@ -255,23 +282,15 @@ class ESM2LoRAContact(L.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         """Validation step."""
-        input_ids = batch["input_ids"]
-        attention_mask = batch["attention_mask"]
+        contact_logits, mask_2d = self._forward_pass(batch)
         contact_map = batch["contact_maps"]
-        seq_lengths = batch["seq_lengths"]
-
-        max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask_2d = self.create_mask(seq_lengths, max_length)
-
-        # Forward pass
-        contact_logits = self(input_ids, attention_mask, mask_2d)
 
         # Compute loss only on valid positions
         loss = self.compute_loss(contact_logits, contact_map, mask_2d).item()
 
         # Compute comprehensive metrics
         metrics = self.contact_metrics.compute_all_metrics(
-            contact_logits, contact_map, seq_lengths, mask_2d, average=False
+            contact_logits, contact_map, batch["seq_lengths"], mask_2d, average=False, add_other_metrics=True
         )
 
         self.validation_step_outputs.append({"loss": loss, "metrics": metrics})
@@ -298,15 +317,7 @@ class ESM2LoRAContact(L.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         """Prediction step for inference."""
-        input_ids = batch["input_ids"]
-        attention_mask = batch["attention_mask"]
-        seq_lengths = batch["seq_lengths"]
-
-        max_length = input_ids.shape[-1] - 2  # -2 for CLS and EOS tokens
-        mask_2d = self.create_mask(seq_lengths, max_length)
-
-        # Forward pass
-        contact_logits = self(input_ids, attention_mask, mask_2d)
+        contact_logits, mask_2d = self._forward_pass(batch)
 
         return {
             "contact_logits": contact_logits,

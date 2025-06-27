@@ -1,0 +1,10 @@
+defaults:
+  - esm2_lora_template_contactconv_650m
+
+use_weighted_attn_mask: true
+contacthead_init_from: ${data_dir}/checkpoints/best_lora_conv_refiner_k7.ckpt
+use_gated_cross_attn: true
+gated_cross_attn_init: -4.0
+gate_lr_multiplier: 100
+alpha_lr_multiplier: 100
+weighted_attn_mask_alpha_init: -4.0
