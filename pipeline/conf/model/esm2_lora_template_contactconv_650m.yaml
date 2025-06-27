@@ -1,12 +1,13 @@
 defaults: 
   - esm2_lora_contact_650m
 
-_target_: esm2_lora_contactconv_template
+_target_: esm2_lora_template_contactconv
 name: "esm2 lora with conv refiner and template"
 cnn_kernel_size: 7
 contact_self_attention_heads: 4
 contact_cross_attention_heads: 4
 unfreeze_lora: False
+use_weighted_attn_mask: false
 
 learning_rate: 5e-4  # Lower learning rate for larger model
 weight_decay: 1e-4 

@@ -12,7 +12,7 @@ contact_threshold: 8.0
 train_dataset_path: ${output_dir}/datasets/train.pt
 val_dataset_path: ${output_dir}/datasets/val.pt
 test_dataset_path: ${output_dir}/datasets/test.pt
-similarity_file_path: ${output_dir}/mmseqs/all_seqs_clust.tsv
+similarity_file_path: ${output_dir}/mmseqs/all_seqs_similarity.tsv
 min_similarity_threshold: 0.3
 max_similarity_threshold: 0.95
 sampler:

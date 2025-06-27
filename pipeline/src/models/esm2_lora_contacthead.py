@@ -157,7 +157,7 @@ class ESM2LoRAContact(L.LightningModule):
             # Apply LoRA to the model
             self.esm_model = get_peft_model(self.esm_model, lora_config)
 
-        if self.config.backbone_init_from is not None:
+        if self.config.backbone_init_from:
             logger.info(f"Loading backbone from {self.config.backbone_init_from}")
             ckpt = torch.load(self.config.backbone_init_from, weights_only=False)
             state_dict = ckpt["state_dict"]
