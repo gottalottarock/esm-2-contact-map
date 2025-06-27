@@ -29,6 +29,7 @@ class EvaluateConfig:
 
     # Output directory
     output_dir: str
+    prefix: str
 
     # Fixed IDs for visualization (optional)
     fixed_visualization_ids: Optional[List[str]] = None
@@ -44,10 +45,12 @@ def get_wandb_run_id(wandb_run_dir: Optional[str], output_dir: str) -> Optional[
     """Get WandB run ID from latest-run file."""
     if wandb_run_dir:
         latest_run_path = Path(wandb_run_dir) / "latest-run"
+        all_runs = list(Path(wandb_run_dir).glob("run-*"))
     else:
         latest_run_path = (
             Path(output_dir).parent / "train_checkpoints" / "wandb" / "latest-run"
         )
+        all_runs = []
 
     if latest_run_path.exists():
         if latest_run_path.is_symlink():
@@ -56,6 +59,10 @@ def get_wandb_run_id(wandb_run_dir: Optional[str], output_dir: str) -> Optional[
         else:
             with open(latest_run_path, "r") as f:
                 run_id = f.read().strip().split("-")[-1]
+        logger.info(f"Found WandB run ID: {run_id}")
+        return run_id
+    elif len(all_runs) == 1:
+        run_id = all_runs[0].stem.split("-")[-1]
         logger.info(f"Found WandB run ID: {run_id}")
         return run_id
     else:
@@ -128,19 +135,23 @@ def main(cfg: EvaluateConfig):
     results["boxplot_figure"].savefig(boxplot_path, dpi=600, bbox_inches="tight")
     logger.info(f"Saved box plots to {boxplot_path}")
 
+    boxplot_path_additional_metrics = output_dir / "metrics_boxplots_additional.png"
+    results["boxplot_figure_additional_metrics"].savefig(boxplot_path_additional_metrics, dpi=600, bbox_inches="tight")
+    logger.info(f"Saved box plots to {boxplot_path_additional_metrics}")
+
     # Initialize WandB and log results
     if not cfg.wo_wandb:
 
         # Log metrics
         wandb.log(
             {
-                f"val-avg_metrics_simple/{k}": v
+                f"{cfg.prefix}-avg_metrics_simple/{k}": v
                 for k, v in results["avg_metrics_simple"].items()
             }
         )
         wandb.log(
             {
-                f"val-avg_metrics_pdb_first/{k}": v
+                f"{cfg.prefix}-avg_metrics_pdb_first/{k}": v
                 for k, v in results["avg_metrics_pdb_first"].items()
             }
         )
@@ -148,9 +159,10 @@ def main(cfg: EvaluateConfig):
         # Log images
         wandb.log(
             {
-                "val-contact_visualizations": wandb.Image(str(contact_plot_path)),
-                "val-metrics_lineplots": wandb.Image(str(lineplot_path)),
-                "val-metrics_boxplots": wandb.Image(str(boxplot_path)),
+                f"{cfg.prefix}-contact_visualizations": wandb.Image(str(contact_plot_path)),
+                f"{cfg.prefix}-metrics_lineplots": wandb.Image(str(lineplot_path)),
+                f"{cfg.prefix}-metrics_boxplots": wandb.Image(str(boxplot_path)),
+                f"{cfg.prefix}-metrics_boxplots_additional": wandb.Image(str(boxplot_path_additional_metrics)),
             }
         )
 

@@ -14,10 +14,26 @@ defaults:
     
     # Fixed IDs for visualization (optional)
     fixed_visualization_ids:
-      - "train_7H6Y_C" 
-      - "train_4J49_A"
-      - "train_6PR9_A"
+      - "train_1YVY_A" 
+      - "train_7SV6_A"
+      - "train_2ZCA_B"
+    prefix: val
+    # WandB settings
+    wo_wandb: false
+    wandb_run_dir: ${trainer.output_dir}/wandb
+
+'test':
+  script: src/evaluate.py
+  params:
+    # Data paths
+    dataset_path: ${output_dir}/datasets/test.pt
+    predictions_path: ${output_dir}/predictions/test.pkl
+    clusters_path: ${output_dir}/mmseqs/all_seqs_clust.tsv
     
+    # Output directory
+    output_dir: ${output_dir}/evaluation/test
+
+    prefix: test
     # WandB settings
     wo_wandb: false
     wandb_run_dir: ${trainer.output_dir}/wandb
